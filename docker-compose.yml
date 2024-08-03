@@ -10,10 +10,35 @@ services:
     volumes:
       - ./api/run.py:/back-api/run.py
       - ./api/app:/back-api/app
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       ElectXChain_network:
         aliases:
           - "api_host"
+
+  db:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: db_electionxchain
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    ports:
+      - "3306:3306"
+    networks:
+      ElectXChain_network:
+        aliases:
+          - "db_host"
 
 networks: 
   ElectXChain_network:
@@ -21,4 +46,7 @@ networks:
     driver: bridge 
     ipam: 
       driver: default
+
+volumes:
+  data:
 
