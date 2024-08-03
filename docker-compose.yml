@@ -7,3 +7,18 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
+    volumes:
+      - ./api/run.py:/back-api/run.py
+      - ./api/app:/back-api/app
+    networks:
+      ElectXChain_network:
+        aliases:
+          - "api_host"
+
+networks: 
+  ElectXChain_network:
+    name: Elect_net 
+    driver: bridge 
+    ipam: 
+      driver: default
+
