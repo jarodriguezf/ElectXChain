@@ -5,6 +5,9 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
       - "80:80"
     volumes:
@@ -19,14 +22,14 @@ services:
           - "api_host"
 
   db:
-    image: mariadb
+    image: mariadb:latest
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: db_electionxchain
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-      - data:/var/lib/mysql
+      - data_db:/var/lib/mysql
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       start_period: 10s
@@ -48,5 +51,5 @@ networks:
       driver: default
 
 volumes:
-  data:
+  data_db:
 
