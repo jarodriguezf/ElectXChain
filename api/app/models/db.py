@@ -7,6 +7,7 @@ logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# CREDENTIALS
 def get_credentials():
     USER = os.getenv('MYSQL_USER')
     PASSWORD = os.getenv('MYSQL_ROOT_PASSWORD')
@@ -15,13 +16,14 @@ def get_credentials():
         raise ValueError('Database credentials are not set in enviroment variables')
     return USER, PASSWORD
 
+
 # CLASS CREATE STRUCTURE IN DB USERS VALUES (FOR REGISTER AND AUTENTICATION)
 class StructTableDbUsers():
     def __init__(self):
         self.host = "db_host"
         self.user, self.password = get_credentials()
         self.database = "db_electionxchain"
-    
+
     def cnx(self):
         try:
             mydb = MySQLdb.connect(
@@ -34,8 +36,7 @@ class StructTableDbUsers():
             return mydb
         except MySQLdb.Error as err:
             logger.error(f'Error: {err}')
-            return None
-        
+            return None    
         
     def create_table(self):
         mydb = self.cnx()
@@ -121,4 +122,86 @@ class InsertDataDbUsers():
             logger.error('Connection to the database failed.')
             sys.stdout.flush()
 
+
+# CHECK IF NIE EXISTS FOR USER ALREADY REGISTERED
+class ShowNieExists():
+    def __init__(self):
+        self.host = "db_host"
+        self.user, self.password = get_credentials()
+        self.database = "db_electionxchain"
+
+    def cnx(self):
+        try:
+            mydb = MySQLdb.connect(
+                host = self.host,
+                user = self.user,
+                passwd = self.password,
+                db = self.database
+            )
+            logger.info('Successful connection to the DB')
+            return mydb
+        except MySQLdb.Error as err:
+            logger.error(f'Error: {err}')
+            return None
     
+    def show_nie_exists(self, nie):
+        mydb = self.cnx()
+        if mydb:
+            try:
+                with mydb.cursor() as cursor:
+                    sql = "SELECT COUNT(*) FROM users where NIE = %s"
+                    cursor.execute(sql, (nie,))
+                    result = cursor.fetchone()
+                    exists = result[0]>0
+                    logger.info(f'NIE check: {"Exists" if exists else "Does not exist"}')
+                    return exists
+            except MySQLdb.Error as err:
+                logger.error(f'Error to fetching the NIE: {err}')
+            finally:
+                mydb.close()
+                logger.info('Database connection closed')
+        else:
+            logger.error('Connection to the database failed.')
+            sys.stdout.flush()
+
+
+# CHECK IF NUMBER_TELEPHONE EXISTS FOR USER ALREADY REGISTERED
+class ShowTelephoneExists():
+    def __init__(self):
+        self.host = "db_host"
+        self.user, self.password = get_credentials()
+        self.database = "db_electionxchain"
+
+    def cnx(self):
+        try:
+            mydb = MySQLdb.connect(
+                host = self.host,
+                user = self.user,
+                passwd = self.password,
+                db = self.database
+            )
+            logger.info('Successful connection to the DB')
+            return mydb
+        except MySQLdb.Error as err:
+            logger.error(f'Error: {err}')
+            return None
+    
+    def show_telephone_exists(self, number):
+        mydb = self.cnx()
+        if mydb:
+            try:
+                with mydb.cursor() as cursor:
+                    sql = "SELECT COUNT(*) FROM users where number_tel = %s"
+                    cursor.execute(sql, (number,))
+                    result = cursor.fetchone()
+                    exists = result[0]>0
+                    logger.info(f'Telephone Number check: {"Exists" if exists else "Does not exist"}')
+                    return exists
+            except MySQLdb.Error as err:
+                logger.error(f'Error to fetching the Telephone number: {err}')
+            finally:
+                mydb.close()
+                logger.info('Database connection closed')
+        else:
+            logger.error('Connection to the database failed.')
+            sys.stdout.flush()
