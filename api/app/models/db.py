@@ -48,9 +48,9 @@ class StructTableDbUsers():
 
                     # Create new table with the values of the register(form) and autentication(default)
                     cursor.execute("""CREATE TABLE users (
-                        ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        id VARCHAR(36) DEFAULT(uuid()) PRIMARY KEY NOT NULL,
                         name VARCHAR(255) NOT NULL,
-                        NIE VARCHAR(9) NOT NULL UNIQUE,
+                        dni VARCHAR(9) NOT NULL UNIQUE,
                         birth DATE NOT NULL,
                         province VARCHAR(50) NOT NULL,
                         genre VARCHAR(10),
@@ -97,10 +97,10 @@ class InsertDataDbUsers():
         if mydb:
             try:
                 with mydb.cursor() as cursor:
-                    sql = "INSERT INTO users (name, nie, birth, province, genre, number_tel, pub_key, priv_key, activate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
+                    sql = "INSERT INTO users (name, dni, birth, province, genre, number_tel, pub_key, priv_key, activate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
                     val = (
                         user_instance.name,
-                        user_instance.nie,
+                        user_instance.dni,
                         user_instance.birth,
                         user_instance.province,
                         user_instance.genre,
@@ -124,7 +124,7 @@ class InsertDataDbUsers():
 
 
 # CHECK IF NIE EXISTS FOR USER ALREADY REGISTERED
-class ShowNieExists():
+class ShowDniExists():
     def __init__(self):
         self.host = "db_host"
         self.user, self.password = get_credentials()
@@ -144,19 +144,19 @@ class ShowNieExists():
             logger.error(f'Error: {err}')
             return None
     
-    def show_nie_exists(self, nie):
+    def show_dni_exists(self, dni):
         mydb = self.cnx()
         if mydb:
             try:
                 with mydb.cursor() as cursor:
-                    sql = "SELECT COUNT(*) FROM users where NIE = %s"
-                    cursor.execute(sql, (nie,))
+                    sql = "SELECT COUNT(*) FROM users where dni = %s"
+                    cursor.execute(sql, (dni,))
                     result = cursor.fetchone()
                     exists = result[0]>0
-                    logger.info(f'NIE check: {"Exists" if exists else "Does not exist"}')
+                    logger.info(f'DNI check: {"Exists" if exists else "Does not exist"}')
                     return exists
             except MySQLdb.Error as err:
-                logger.error(f'Error to fetching the NIE: {err}')
+                logger.error(f'Error to fetching the DNI: {err}')
             finally:
                 mydb.close()
                 logger.info('Database connection closed')

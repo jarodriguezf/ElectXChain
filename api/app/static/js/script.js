@@ -13,7 +13,7 @@ document.getElementById('registrationForm').addEventListener('submit', function(
                 data['name'] = value;
                 break;
             case 'dni':
-                data['nie'] = value;
+                data['dni'] = value;
                 break;
             case 'dob':
                 // Ensure date is in YYYY-MM-DD format

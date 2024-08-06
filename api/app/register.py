@@ -1,20 +1,20 @@
 from datetime import datetime, date
-
+import re
 
 # VALIDATE THE NIE 
-def nie_validation(nie: str) -> bool:
-    table = "TRWAGMYFPDXBNJZSQVHLCKE"
+def dni_nie_validation(dni: str) -> bool:
+    tabla = "TRWAGMYFPDXBNJZSQVHLCKE"
     dig_ext = "XYZ"
     reemp_dig_ext = {'X':'0', 'Y':'1', 'Z':'2'}
-    numbers = "1234567890"
-    nie = nie.upper()
-    if len(nie) == 9:
-        dig_control = nie[8]
-        nie = nie[:8]
-        if nie[0] in dig_ext:
-            nie = nie.replace(nie[0], reemp_dig_ext[nie[0]])
-        return len(nie) == len([n for n in nie if n in numbers]) \
-            and table[int(nie)%23] == dig_control
+    numeros = "1234567890"
+    dni = dni.upper()
+    if len(dni) == 9:
+        dig_control = dni[8]
+        dni = dni[:8]
+        if dni[0] in dig_ext:
+            dni = dni.replace(dni[0], reemp_dig_ext[dni[0]])
+        return len(dni) == len([n for n in dni if n in numeros]) \
+            and tabla[int(dni)%23] == dig_control
     return False
 
 

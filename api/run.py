@@ -4,9 +4,9 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
-from app.register import nie_validation, is_adult
+from app.register import dni_nie_validation, is_adult
 from app.models.user import User,  UserSchema
-from app.models.db import StructTableDbUsers, InsertDataDbUsers, ShowNieExists, ShowTelephoneExists
+from app.models.db import StructTableDbUsers, InsertDataDbUsers, ShowDniExists, ShowTelephoneExists
 
 app = FastAPI()
 
@@ -20,8 +20,8 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 # **CREATE TABLE DB (DONT EXECUTE IF YOU HAVE A TABLE, THE EXECUTE DROP THE TABLE AND CREATE IT AGAIN)**
-# create_db = StructTableDbUsers()
-# create_db.create_table()
+#create_db = StructTableDbUsers()
+#create_db.create_table()
 
 
 # REGISTER PAGE
@@ -43,24 +43,24 @@ async def save_data_user(user: UserSchema):
      try:
           # CLASSES
           insertNewData = InsertDataDbUsers()
-          NIEexists = ShowNieExists()
+          NIEexists = ShowDniExists()
           TelExists = ShowTelephoneExists()
 
           user_instance = User(**user.dict())
           logger.debug(f"Received user instance: {user_instance.get_user()}")
 
           # VALIDATION FIELDS
-          if not nie_validation(user_instance.nie):
-               logger.error('Error: NIE incorrect')
-               raise HTTPException(status_code=400, detail="Incorrect NIE format")
+          if not dni_nie_validation(user_instance.dni):
+               logger.error('Error: DNI incorrect')
+               raise HTTPException(status_code=400, detail="Incorrect DNI format")
           
           if not is_adult(user_instance.birth):
                logger.error('Error: you need to be 18 years or older')
                raise HTTPException(status_code=400, detail="User must be 18 years or older")
           
-          if NIEexists.show_nie_exists(user_instance.nie):
-               logger.error('Error: NIE already exists for a user')
-               raise HTTPException(status_code=400, detail="User exists for that NIE")
+          if NIEexists.show_dni_exists(user_instance.dni):
+               logger.error('Error: DNI already exists for a user')
+               raise HTTPException(status_code=400, detail="User exists for that DNI")
           
           if TelExists.show_telephone_exists(user_instance.number_tel):
                logger.error('Error: Telephone already exists for a user')

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 # USER CLASS AND STRUCTURE
 class UserSchema(BaseModel):
     name: str
-    nie: str
+    dni: str
     birth: date
     province: str
     genre: Optional[str] = None
@@ -16,10 +16,10 @@ class UserSchema(BaseModel):
     activate: int = 0
 
 class User():
-    def __init__(self, name: str, nie: str, birth: date, province: str, genre: str, number_tel: int, pub_key: Optional[bytes], 
+    def __init__(self, name: str, dni: str, birth: date, province: str, genre: str, number_tel: int, pub_key: Optional[bytes], 
                 priv_key: Optional[bytes], activate: int = 0):
         self.name = name
-        self.nie = nie
+        self.dni = dni
         self.birth = birth
         self.province = province
         self.genre =  genre
@@ -29,5 +29,5 @@ class User():
         self.activate = activate
 
     def get_user(self):
-        return f"User(name={self.name}, nie={self.nie}, birth={self.birth}, province={self.province}, genre={self.genre}, number_tel={self.number_tel}, pub_key={self.pub_key}, priv_key={self.priv_key}, activate={self.activate})"
+        return f"User(name={self.name}, dni={self.dni}, birth={self.birth}, province={self.province}, genre={self.genre}, number_tel={self.number_tel}, pub_key={self.pub_key}, priv_key={self.priv_key}, activate={self.activate})"
     
