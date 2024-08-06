@@ -65,13 +65,11 @@ async def save_data_user(user: UserSchema):
           if TelExists.show_telephone_exists(user_instance.number_tel):
                logger.error('Error: Telephone already exists for a user')
                raise HTTPException(status_code=400, detail="User exists for that Telephone")
+          
           # SAVE THE USER
           insertNewData.insert_data_db(user_instance=user_instance)
           return {"message": "User data received"}
      
-     except ValidationError as e:
-        logger.error(f'ValidationError: {e}')
-        raise HTTPException(status_code=422, detail="Validation error")
      except ValueError as e:
           logger.error(f'ValueError: {e}')
           raise HTTPException(status_code=400, detail=str(e))

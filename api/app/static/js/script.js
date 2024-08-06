@@ -1,13 +1,13 @@
 
 // EXTRACT REGISTER FORM AND SEND IT TO THE API
-document.getElementById('registrationForm').addEventListener('submit', function(event) {
+document.getElementById('registrationForm').addEventListener('submit', async function(event) {
     event.preventDefault();
     
     const formData = new FormData(this);
     const data = {};
 
+    // CONVERT FIELD NAMES TO MATCH UserSchema
     formData.forEach((value, key) => {
-        // Convert field names to match UserSchema
         switch (key) {
             case 'fullName':
                 data['name'] = value;
@@ -30,29 +30,44 @@ document.getElementById('registrationForm').addEventListener('submit', function(
                 break;
         }
     });
-
-
     console.log('Data to send:', JSON.stringify(data));
 
-    fetch('/register', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    })
-    .then(response => {
+    // CALL API TO SEND THE DATA
+    try {
+        const response = await fetch('/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
         if (!response.ok) {
-            return response.json().then(err => {
-                throw new Error(err.detail || 'Unknown error');
-            });
+            const errorData = await response.json();
+            handleError(response.status, errorData.detail);
+        } else {
+            const data = await response.json();
+            console.log('Success:', data);
+            alert('User registered successfully!');
         }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Success:', data);
-    })
-    .catch((error) => {
+    } catch (error) {
         console.error('Error:', error);
-    });
+        alert('An unexpected error occurred. Please try again later.');
+    }
 });
+
+
+// HANDLE THE INVALIDATED FIELDS IN THE PROCESS OF REGISTER
+function handleError(status, detail) {
+    switch (status) {
+        case 400:
+            alert(`Error: ${detail}`);
+            break;
+        case 422:
+            alert('Validation error: Please check your input.');
+            break;
+        default:
+            alert('An unexpected error occurred.');
+            break;
+    }
+}
