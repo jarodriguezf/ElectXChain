@@ -57,6 +57,7 @@ class StructTableDbUsers():
                         number_tel VARCHAR(15) NOT NULL,
                         pub_key VARBINARY(500),
                         priv_key VARBINARY(500),
+                        regist_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                         activate TINYINT(1)
                     );""")
                     
