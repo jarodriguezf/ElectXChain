@@ -17,7 +17,7 @@ def get_credentials():
     return USER, PASSWORD
 
 
-# CLASS CREATE STRUCTURE IN DB USERS VALUES (FOR REGISTER AND AUTENTICATION)
+# CLASS CREATE STRUCTURE IN DB
 class StructTableDbUsers():
     def __init__(self):
         self.host = "db_host"
@@ -72,7 +72,7 @@ class StructTableDbUsers():
             logger.error(f"Connection to the database failed.")
 
 
-# INSERT NEW DATA (REGISTER PART)
+# INSERT
 class InsertDataDbUsers():
     def __init__(self):
         self.host = "db_host"
@@ -124,8 +124,8 @@ class InsertDataDbUsers():
             sys.stdout.flush()
 
 
-# CHECK IF NIE EXISTS FOR USER ALREADY REGISTERED
-class ShowDniExists():
+# SELECT
+class ShowsDataDbUsers():
     def __init__(self):
         self.host = "db_host"
         self.user, self.password = get_credentials()
@@ -145,6 +145,7 @@ class ShowDniExists():
             logger.error(f'Error: {err}')
             return None
     
+    # CHECK IF NIE EXISTS FOR USER ALREADY REGISTERED
     def show_dni_exists(self, dni):
         mydb = self.cnx()
         if mydb:
@@ -164,29 +165,8 @@ class ShowDniExists():
         else:
             logger.error('Connection to the database failed.')
             sys.stdout.flush()
-
-
-# CHECK IF NUMBER_TELEPHONE EXISTS FOR USER ALREADY REGISTERED
-class ShowTelephoneExists():
-    def __init__(self):
-        self.host = "db_host"
-        self.user, self.password = get_credentials()
-        self.database = "db_electionxchain"
-
-    def cnx(self):
-        try:
-            mydb = MySQLdb.connect(
-                host = self.host,
-                user = self.user,
-                passwd = self.password,
-                db = self.database
-            )
-            logger.info('Successful connection to the DB')
-            return mydb
-        except MySQLdb.Error as err:
-            logger.error(f'Error: {err}')
-            return None
     
+    # CHECK IF NUMBER_TELEPHONE EXISTS FOR USER ALREADY REGISTERED
     def show_telephone_exists(self, number):
         mydb = self.cnx()
         if mydb:
@@ -206,3 +186,6 @@ class ShowTelephoneExists():
         else:
             logger.error('Connection to the database failed.')
             sys.stdout.flush()
+
+    
+    
