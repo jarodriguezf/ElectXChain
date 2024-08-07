@@ -3,7 +3,12 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-# USER CLASS AND STRUCTURE
+#USER CLASS AND STRUCTURE (AUTENTICATION)
+class UserDataAut(BaseModel):
+    dni: str
+    number_tel: int
+
+# USER CLASS AND STRUCTURE (REGISTER)
 class UserSchema(BaseModel):
     name: str
     dni: str
