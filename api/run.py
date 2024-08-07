@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 from app.register import dni_nie_validation, is_adult
-from app.models.user import User,  UserSchema
+from app.models.user import User,  UserSchema, UserDataAut
 from app.models.db import ShowsDataDbUsers, InsertDataDbUsers, StructTableDbUsers
 
 app = FastAPI()
@@ -77,4 +77,41 @@ async def save_data_user(user: UserSchema):
      except Exception as e:
         logger.error(f'Unexpected error: {e}')
         raise HTTPException(status_code=500, detail="Internal Server Error")
-    
+     
+
+# AUTENTICATION PAGE
+@app.get("/page_autentication", response_class = HTMLResponse)
+async def autenticate_page(request: Request):
+     try:
+          return templates.TemplateResponse("autentication.html", {"request": request})
+     except TypeError as e:
+          logger.error(f'Error: {e}')
+          raise HTTPException(status_code=500, detail="Internal Server Error")
+     except Exception as e:
+          logger.error(f'Unexpected error: {e}')
+          raise HTTPException(status_code=500, detail='Internal Server Error')
+     
+
+# SEND DNI/NIE AND TELEPHONE NUMBER TO VALIDATE THE REGISTERED USER
+@app.post("/autentication")
+async def validate_data_register_user(user: UserDataAut):
+     try:
+          dni = user.dni
+          number_tel = user.number_tel
+          logger.debug('Autentication data:', dni, number_tel)
+
+          showsData = ShowsDataDbUsers()
+
+          # VALIDATION IN THE SYSTEM
+          if not showsData.show_dni_tel_exists_for_a_user(dni, number_tel):
+               logger.error(f'Error: The user not exists, try to register first')
+               raise HTTPException(status_code=400, detail="User not exists in the system")
+          return {'message':'user exists in the system'}
+     
+     except HTTPException as e:
+          logger.error(f'HTTPException: {e.detail}')
+          raise e
+     except Exception as e:
+          logger.error(f'Unexpected error: {e}')
+          raise HTTPException(status_code=500, detail='Internal Server Error')
+     
