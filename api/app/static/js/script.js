@@ -71,3 +71,19 @@ function handleError(status, detail) {
             break;
     }
 }
+
+
+// FETCH AND LOAD PROVINCES ON PAGE LOAD
+fetch('/app/static/js/provinces.json')
+.then(response => response.json())
+.then(provinces => {
+    const selectElement = document.getElementById('province');
+
+    provinces.forEach(province => {
+        const option = document.createElement('option');
+        option.value = province;
+        option.textContent = province;
+        selectElement.appendChild(option);
+    });
+})
+.catch(error => console.error('Error loading provinces:', error));
