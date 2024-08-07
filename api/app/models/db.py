@@ -188,4 +188,26 @@ class ShowsDataDbUsers():
             sys.stdout.flush()
 
     
+    # VALIDATE THE DNI/NIE WITH THE TELEPHONE NUMBER
+    def show_dni_tel_exists_for_a_user(self, dni, number_tel):
+        mydb = self.cnx()
+        if mydb:
+            try:
+                with mydb.cursor() as cursor:
+                    sql = "SELECT COUNT(*) FROM users where dni = %s and number_tel = %s"
+                    cursor.execute(sql, (dni,number_tel,))
+                    result = cursor.fetchone()
+                    exists = result[0]>0
+                    logger.info(f'User exists for that dni and tel_number: {"Exists" if exists else "Does not exist"}')
+                    return exists
+            except MySQLdb.Error as err:
+                logger.error(f'Error to fetching the user data for validation: {err}')
+            finally:
+                mydb.close()
+                logger.info('Database connection closed')
+        else:
+            logger.error('Connection to the database failed.')
+            sys.stdout.flush()
+
+    
     
