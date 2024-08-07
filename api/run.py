@@ -6,7 +6,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 from app.register import dni_nie_validation, is_adult
 from app.models.user import User,  UserSchema
-from app.models.db import StructTableDbUsers, InsertDataDbUsers, ShowDniExists, ShowTelephoneExists
+from app.models.db import ShowsDataDbUsers, InsertDataDbUsers, StructTableDbUsers
 
 app = FastAPI()
 
@@ -43,8 +43,7 @@ async def save_data_user(user: UserSchema):
      try:
           # CLASSES
           insertNewData = InsertDataDbUsers()
-          NIEexists = ShowDniExists()
-          TelExists = ShowTelephoneExists()
+          showsData = ShowsDataDbUsers()
 
           user_instance = User(**user.dict())
           logger.debug(f"Received user instance: {user_instance.get_user()}")
@@ -58,18 +57,20 @@ async def save_data_user(user: UserSchema):
                logger.error('Error: you need to be 18 years or older')
                raise HTTPException(status_code=400, detail="User must be 18 years or older")
           
-          if NIEexists.show_dni_exists(user_instance.dni):
+          if showsData.show_dni_exists(user_instance.dni):
                logger.error('Error: DNI already exists for a user')
                raise HTTPException(status_code=400, detail="User exists for that DNI")
           
-          if TelExists.show_telephone_exists(user_instance.number_tel):
+          if showsData.show_telephone_exists(user_instance.number_tel):
                logger.error('Error: Telephone already exists for a user')
                raise HTTPException(status_code=400, detail="User exists for that Telephone")
           
           # SAVE THE USER
           insertNewData.insert_data_db(user_instance=user_instance)
           return {"message": "User data received"}
-     
+     except HTTPException as e:
+          logger.error(f'HTTPException: {e.detail}')
+          raise e
      except ValueError as e:
           logger.error(f'ValueError: {e}')
           raise HTTPException(status_code=400, detail=str(e))
