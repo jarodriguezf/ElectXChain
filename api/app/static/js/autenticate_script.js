@@ -35,6 +35,8 @@ document.getElementById('autenticationForm').addEventListener('submit', async fu
             const data = await response.json();
             console.log('Success:', data);
             alert('User exists in the system!');
+            console.log('Redireccionando a /2fa_validation');
+            location.href = '/2fa_validation';
         }
     } catch (error) {
         console.error('Error:', error);
