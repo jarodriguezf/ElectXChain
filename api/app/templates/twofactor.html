@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2-factor Page</title>
+    <link rel="stylesheet" href="/app/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Validate The Code</h1>
+        <form id="twofactorForm">
+            <h2>Enter the code received in your sms (messages)</h2>
+            
+            <label for="token">Code received:</label>
+            <input type="text" id="token" name="token" required>
+        
+            <div>
+                <input type="submit" value="Click here to Send" />
+            </div>
+        </form>
+    </div>
+    <script src="/app/static/js/twofactor_script.js"></script>
+</body>
+</html>
