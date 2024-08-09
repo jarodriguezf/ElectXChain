@@ -3,6 +3,11 @@ from typing import Optional
 from pydantic import BaseModel
 
 
+#USER STRUCTURE (2FA)
+class PhoneNumberSchema(BaseModel):
+    number_tel: int
+
+
 #USER STRUCTURE (AUTENTICATION)
 class UserAutSchema(BaseModel):
     dni: str
