@@ -1,12 +1,16 @@
 import logging
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 from app.register import dni_nie_validation, is_adult
-from app.models.user import User,  UserSchema, UserDataAut
+from app.models.user import User,  UserSchema, UserAutSchema, PhoneNumberSchema
 from app.models.db import ShowsDataDbUsers, InsertDataDbUsers, StructTableDbUsers
+from app.models.two_factor import TokenSchema
+from app.autentication import get_token, validate_token
+import asyncio
+import time
 
 app = FastAPI()
 
@@ -94,7 +98,7 @@ async def autenticate_page(request: Request):
 
 # SEND DNI/NIE AND TELEPHONE NUMBER TO VALIDATE THE REGISTERED USER
 @app.post("/autentication")
-async def validate_data_register_user(user: UserDataAut):
+async def validate_data_register_user(user: UserAutSchema):
      try:
           dni = user.dni
           number_tel = user.number_tel
@@ -106,8 +110,11 @@ async def validate_data_register_user(user: UserDataAut):
           if not showsData.show_dni_tel_exists_for_a_user(dni, number_tel):
                logger.error(f'Error: The user not exists, try to register first')
                raise HTTPException(status_code=400, detail="User not exists in the system")
-          return {'message':'user exists in the system'}
-     
+          
+          # start coroutines
+          asyncio.create_task(simulate_sms(PhoneNumberSchema(number_tel=number_tel)))
+          return {'message':'autentication correct'}
+
      except HTTPException as e:
           logger.error(f'HTTPException: {e.detail}')
           raise e
@@ -115,3 +122,51 @@ async def validate_data_register_user(user: UserDataAut):
           logger.error(f'Unexpected error: {e}')
           raise HTTPException(status_code=500, detail='Internal Server Error')
      
+
+# RETURN TOKEN (SIMULATION SMS)
+@app.post('/recive_sms')
+async def simulate_sms(data_number: PhoneNumberSchema):
+     try:
+          number_tel = data_number.number_tel
+          token = get_token()
+
+          logger.info(f"Simulating the send of SMS to {number_tel}")
+          await asyncio.sleep(5)
+          logger.info(f"Simulating the reception of SMS in the number {number_tel} - with the code: {token}")
+
+          return {"status": "user_exists", "token": token}
+     except Exception as e:
+          logger.error(f'Error: The system failed in processing of the sms - {str(e)}')
+          return HTTPException(status_code=500, detail='Internal Server Error')
+
+
+# 2FA PAGE
+@app.get("/2fa_validation", response_class = HTMLResponse)
+async def two_factor_page(request: Request):
+     try:
+          return templates.TemplateResponse("twofactor.html", {"request": request})
+     
+     except TypeError as e:
+          logger.error(f'Error: {e}')
+          raise HTTPException(status_code=500, detail="Internal Server Error")
+     except Exception as e:
+          logger.error(f'Unexpected error: {e}')
+          raise HTTPException(status_code=500, detail='Internal Server Error')
+     
+
+@app.post("/validation_token_2fa")
+async def validate_data_register_user(input: TokenSchema):
+     try:
+          input_token = input.token
+          logger.debug(f'Token received by the user: {input_token}')
+          
+          if not validate_token(input_token):
+               raise HTTPException(status_code=400, detail='Error: Invalid token')
+
+          return {'message': 'Valid token'}
+     except HTTPException as e:
+          logger.error(f'HTTPException: {e.detail}')
+          raise e
+     except Exception as e:
+          logger.error(f'Unexpected error: {e}')
+          raise HTTPException(status_code=500, detail='Internal Server Error')
