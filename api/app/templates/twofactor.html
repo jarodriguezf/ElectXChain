@@ -14,10 +14,13 @@
             
             <label for="token">Code received:</label>
             <input type="text" id="token" name="token" required>
+
+            <input type="hidden" id="number_tel" name="number_tel" value="{{ number_tel }}">
         
             <div>
                 <input type="submit" value="Click here to Send" />
             </div>
+            <a href="#" id='resendCode'>resend code</a>
         </form>
     </div>
     <script src="/app/static/js/twofactor_script.js"></script>
