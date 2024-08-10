@@ -1,5 +1,5 @@
 import logging
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -102,8 +102,6 @@ async def validate_data_register_user(user: UserAutSchema):
      try:
           dni = user.dni
           number_tel = user.number_tel
-          logger.debug('Autentication data:', dni, number_tel)
-
           showsData = ShowsDataDbUsers()
 
           # VALIDATION IN THE SYSTEM
@@ -113,8 +111,9 @@ async def validate_data_register_user(user: UserAutSchema):
           
           # start coroutines
           asyncio.create_task(simulate_sms(PhoneNumberSchema(number_tel=number_tel)))
-          return {'message':'autentication correct'}
 
+          redirect_url = f"/2fa_validation?number_tel={number_tel}"
+          return RedirectResponse(url=redirect_url, status_code = 302)
      except HTTPException as e:
           logger.error(f'HTTPException: {e.detail}')
           raise e
@@ -130,35 +129,36 @@ async def simulate_sms(data_number: PhoneNumberSchema):
           number_tel = data_number.number_tel
           token = get_token()
 
-          logger.info(f"Simulating the send of SMS to {number_tel}")
-          await asyncio.sleep(5)
-          logger.info(f"Simulating the reception of SMS in the number {number_tel} - with the code: {token}")
+          logger.info(f"Simulating the sending of SMS to {number_tel}...")
 
-          return {"status": "user_exists", "token": token}
+          await asyncio.sleep(10)
+
+          logger.info(f"📲 Simulating SMS Reception")
+          logger.info(f"📞 Number: {number_tel}")
+          logger.info(f"🔑 Code: {token}")
+          logger.info(f"✅ SMS successfully simulated at {number_tel}.")
+
+          return {"status": "token_generated"}
      except Exception as e:
-          logger.error(f'Error: The system failed in processing of the sms - {str(e)}')
+          logger.error(f'Error: The system failed in the processing of the sms - {str(e)}')
           return HTTPException(status_code=500, detail='Internal Server Error')
 
 
 # 2FA PAGE
-@app.get("/2fa_validation", response_class = HTMLResponse)
-async def two_factor_page(request: Request):
-     try:
-          return templates.TemplateResponse("twofactor.html", {"request": request})
-     
-     except TypeError as e:
-          logger.error(f'Error: {e}')
-          raise HTTPException(status_code=500, detail="Internal Server Error")
-     except Exception as e:
-          logger.error(f'Unexpected error: {e}')
-          raise HTTPException(status_code=500, detail='Internal Server Error')
+@app.get("/2fa_validation", response_class=HTMLResponse)
+async def two_factor_page(request: Request, number_tel: int = Query(...)):
+    try:
+        return templates.TemplateResponse("twofactor.html", {"request": request, "number_tel": number_tel})
+    except Exception as e:
+        logger.error(f'Unexpected error: {e}')
+        raise HTTPException(status_code=500, detail='Internal Server Error')
      
 
+# VALIDATE THE TOKEN INPUT
 @app.post("/validation_token_2fa")
 async def validate_data_register_user(input: TokenSchema):
      try:
           input_token = input.token
-          logger.debug(f'Token received by the user: {input_token}')
           
           if not validate_token(input_token):
                raise HTTPException(status_code=400, detail='Error: Invalid token')
