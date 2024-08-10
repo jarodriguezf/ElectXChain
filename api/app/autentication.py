@@ -24,9 +24,7 @@ def get_token() -> str:
     key = manager_key()
     if not key:
         raise Exception('Error: Cant generated the OTP code.')
-    
     totp = topt_instance(key, digits=6, interval=120)
-    logger.debug(f'Code generated: {totp.now()}')
     return totp.now()
 
     
