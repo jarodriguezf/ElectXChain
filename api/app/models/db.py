@@ -121,7 +121,6 @@ class InsertDataDbUsers():
                 logger.info('Database connection closed')
         else:
             logger.error('Connection to the database failed.')
-            sys.stdout.flush()
 
 
 # SELECT
@@ -164,7 +163,6 @@ class ShowsDataDbUsers():
                 logger.info('Database connection closed')
         else:
             logger.error('Connection to the database failed.')
-            sys.stdout.flush()
     
     # CHECK IF NUMBER_TELEPHONE EXISTS FOR USER ALREADY REGISTERED
     def show_telephone_exists(self, number):
@@ -185,8 +183,6 @@ class ShowsDataDbUsers():
                 logger.info('Database connection closed')
         else:
             logger.error('Connection to the database failed.')
-            sys.stdout.flush()
-
     
     # VALIDATE THE DNI/NIE WITH THE TELEPHONE NUMBER
     def show_dni_tel_exists_for_a_user(self, dni, number_tel):
@@ -207,7 +203,52 @@ class ShowsDataDbUsers():
                 logger.info('Database connection closed')
         else:
             logger.error('Connection to the database failed.')
-            sys.stdout.flush()
+
+    # FETCH ID FOR A GIVEN DNI/NIE
+    def show_id_user(self, dni):
+        mydb = self.cnx()
+        if mydb:
+            try:
+                with mydb.cursor() as cursor:
+                    sql = "SELECT id FROM users where dni = %s"
+                    cursor.execute(sql, (dni,))
+                    result = cursor.fetchone()
+                    if result is None:
+                        logger.error('Error: Failed to try fetch the id.')
+                        return
+                    logger.info(f'Successfully fetching the id')
+                    return result[0]
+            except MySQLdb.Error as err:
+                logger.error(f'Error to fetching the id: {err}')
+            finally:
+                mydb.close()
+                logger.info('Database connection closed')
+        else:
+            logger.error('Connection to the database failed.')
+
+    # FETCH TELEPHONE NUMBER FOR A GIVEN ID 
+    def show_numberTel_user(self, id):
+        mydb = self.cnx()
+        if mydb:
+            try:
+                with mydb.cursor() as cursor:
+                    sql = "SELECT number_tel FROM users where id = %s"
+                    cursor.execute(sql, (id,))
+                    result = cursor.fetchone()
+                    if result:
+                        number_tel = result[0]
+                        logger.info(f'Successfully fetched number_tel: {number_tel}')
+                        return number_tel
+                    else:
+                        logger.error(f'Error: No number_tel found for ID {id}')
+                        return None
+            except MySQLdb.Error as err:
+                logger.error(f'Error to fetching the number_tel: {err}')
+            finally:
+                mydb.close()
+                logger.info('Database connection closed')
+        else:
+            logger.error('Connection to the database failed.')
 
     
     
