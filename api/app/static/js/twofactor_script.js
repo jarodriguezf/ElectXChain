@@ -1,3 +1,5 @@
+
+// SEND THE INPUT CODE TO VERIFIED
 document.getElementById('twofactorForm').addEventListener('submit', async function(event) {
     event.preventDefault();
     
@@ -32,17 +34,14 @@ document.getElementById('twofactorForm').addEventListener('submit', async functi
     }
 });
 
-document.getElementById('resendCode').addEventListener('click', async function(event) {
-    event.preventDefault(); 
-    const number_tel = new URLSearchParams(window.location.search).get('number_tel');
-    
-    if (!number_tel) {
-        alert('Phone number is missing.');
-        return;
-    }
 
+// RESEND A NEW 2FA CODE
+document.getElementById('resendCode').addEventListener('click', async function(event) {
+
+    event.preventDefault(); 
+    const id = new URLSearchParams(window.location.search).get('id');
     const data = {
-        number_tel: parseInt(number_tel)
+        id: id
     };
     
     try {
