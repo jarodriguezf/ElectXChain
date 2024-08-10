@@ -26,17 +26,14 @@ document.getElementById('autenticationForm').addEventListener('submit', async fu
             },
             body: JSON.stringify(data),
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            handleError(response.status, errorData.detail);
-            
-        } else {
-            const data = await response.json();
-            console.log('Success:', data);
+        if (response.redirected) {
+            console.log('Success in the redirected');
             alert('User exists in the system!');
-            console.log('Redireccionando a /2fa_validation');
-            location.href = '/2fa_validation';
+            window.location.href = response.url;
+
+        }else {
+            const errorData = await response.text();
+            handleError(response.status, errorData);
         }
     } catch (error) {
         console.error('Error:', error);
