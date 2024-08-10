@@ -24,7 +24,43 @@ document.getElementById('twofactorForm').addEventListener('submit', async functi
         } else {
             const data = await response.json();
             console.log('Success:', data);
-            alert('Token received!');
+            alert('Token activated!');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An unexpected error occurred. Please try again later.');
+    }
+});
+
+document.getElementById('resendCode').addEventListener('click', async function(event) {
+    event.preventDefault(); 
+    const number_tel = new URLSearchParams(window.location.search).get('number_tel');
+    
+    if (!number_tel) {
+        alert('Phone number is missing.');
+        return;
+    }
+
+    const data = {
+        number_tel: parseInt(number_tel)
+    };
+    
+    try {
+        const response = await fetch('/recive_sms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            handleError(response.status, errorData);
+        } else {
+            const responseData = await response.json();
+            console.log('Success:', responseData);
+            alert('Code has been resent!');
         }
     } catch (error) {
         console.error('Error:', error);
