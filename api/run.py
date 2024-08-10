@@ -7,9 +7,10 @@ from pydantic import ValidationError
 from app.register import dni_nie_validation, is_adult
 from app.models.user import User,  UserSchema, UserAutSchema, PhoneNumberSchema
 from app.models.db import ShowsDataDbUsers, InsertDataDbUsers, StructTableDbUsers
-from app.models.two_factor import TokenSchema
+from app.models.two_factor import TokenSchema, TokenInputSchema
 from app.autentication import get_token, validate_token
 import asyncio
+from typing import Optional
 import time
 
 app = FastAPI()
@@ -109,10 +110,15 @@ async def validate_data_register_user(user: UserAutSchema):
                logger.error(f'Error: The user not exists, try to register first')
                raise HTTPException(status_code=400, detail="User not exists in the system")
           
-          # start coroutines
-          asyncio.create_task(simulate_sms(PhoneNumberSchema(number_tel=number_tel)))
+          id = showsData.show_id_user(dni)
+          if id is None:
+               logger.error(f'Error: Failed in fetching the id for that dni')
+               raise HTTPException(status_code=400, detail="Id not correspond to the dni specified")
+          
+          # START COROUTINES
+          asyncio.create_task(simulate_sms(TokenSchema(number_tel=number_tel)))
 
-          redirect_url = f"/2fa_validation?number_tel={number_tel}"
+          redirect_url = f"/2fa_validation?id={id}"
           return RedirectResponse(url=redirect_url, status_code = 302)
      except HTTPException as e:
           logger.error(f'HTTPException: {e.detail}')
@@ -122,33 +128,43 @@ async def validate_data_register_user(user: UserAutSchema):
           raise HTTPException(status_code=500, detail='Internal Server Error')
      
 
-# RETURN TOKEN (SIMULATION SMS)
+# RETURN GENERATED TOKEN (SIMULATION SMS)
 @app.post('/recive_sms')
-async def simulate_sms(data_number: PhoneNumberSchema):
+async def simulate_sms(request: TokenSchema):
      try:
-          number_tel = data_number.number_tel
+          number_tel = request.number_tel
+          id = request.id
+
+          # VALIDATION FOR RETURN THE NUMBER_TEL
+          if id:
+               showsData = ShowsDataDbUsers()
+               number_tel = showsData.show_numberTel_user(id)
+
+          if number_tel:
+               logger.debug(f"Fetching number_tel - {number_tel} - for ID - {id} -")
+               logger.info(f"📲 Simulating the sending of SMS to {number_tel}...")
+          else:
+               raise HTTPException(status_code=400, detail='Either data_number or id must be provided')
+
           token = get_token()
-
-          logger.info(f"Simulating the sending of SMS to {number_tel}...")
-
           await asyncio.sleep(10)
 
-          logger.info(f"📲 Simulating SMS Reception")
+          logger.info(f"=======\n📲 Simulating SMS Reception")
           logger.info(f"📞 Number: {number_tel}")
           logger.info(f"🔑 Code: {token}")
-          logger.info(f"✅ SMS successfully simulated at {number_tel}.")
+          logger.info(f"✅ SMS successfully simulated at {number_tel}.\n=======")
 
           return {"status": "token_generated"}
      except Exception as e:
-          logger.error(f'Error: The system failed in the processing of the sms - {str(e)}')
-          return HTTPException(status_code=500, detail='Internal Server Error')
+          logger.error(f'Error: The system failed in the processing of the SMS - {str(e)}')
+          raise HTTPException(status_code=500, detail='Internal Server Error')
 
 
 # 2FA PAGE
 @app.get("/2fa_validation", response_class=HTMLResponse)
-async def two_factor_page(request: Request, number_tel: int = Query(...)):
+async def two_factor_page(request: Request, id: str = Query(...)):
     try:
-        return templates.TemplateResponse("twofactor.html", {"request": request, "number_tel": number_tel})
+        return templates.TemplateResponse("twofactor.html", {"request": request, "id": id})
     except Exception as e:
         logger.error(f'Unexpected error: {e}')
         raise HTTPException(status_code=500, detail='Internal Server Error')
@@ -156,7 +172,7 @@ async def two_factor_page(request: Request, number_tel: int = Query(...)):
 
 # VALIDATE THE TOKEN INPUT
 @app.post("/validation_token_2fa")
-async def validate_data_register_user(input: TokenSchema):
+async def validate_data_register_user(input: TokenInputSchema):
      try:
           input_token = input.token
           
