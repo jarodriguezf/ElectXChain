@@ -3,3 +3,4 @@ pydantic
 jinja2
 mysqlclient
 pyotp
+cryptography
