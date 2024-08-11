@@ -5,7 +5,8 @@ document.getElementById('twofactorForm').addEventListener('submit', async functi
     
     const formData = new FormData(this);
     const data = {
-        token: formData.get('token')
+        token: formData.get('token'),
+        id: formData.get('id')
     };
     console.log('Data to send:', JSON.stringify(data));
 
