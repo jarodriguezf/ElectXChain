@@ -9,6 +9,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MANAGER_KEY_OTP: ${MANAGER_KEY}
+      DECRYPT_KEY: ${DECRYPT_KEY}
       TZ: Europe/Madrid
     ports:
       - "80:80"
