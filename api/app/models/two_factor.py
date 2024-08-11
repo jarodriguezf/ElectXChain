@@ -7,3 +7,4 @@ class TokenSchema(BaseModel):
 
 class TokenInputSchema(BaseModel):
     token: str
+    id: str
