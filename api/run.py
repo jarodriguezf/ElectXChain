@@ -6,9 +6,10 @@ from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 from app.register import dni_nie_validation, is_adult
 from app.models.user import User,  UserSchema, UserAutSchema, PhoneNumberSchema
-from app.models.db import ShowsDataDbUsers, InsertDataDbUsers, StructTableDbUsers
+from app.models.db import ShowsDataDbUsers, InsertDataDbUsers,UpdateDataDbUsers, StructTableDbUsers
 from app.models.two_factor import TokenSchema, TokenInputSchema
 from app.autentication import get_token, validate_token
+from app.asimetricEncript import generate_pair_keys
 import asyncio
 from typing import Optional
 import time
@@ -24,7 +25,7 @@ app.mount("/app/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
 
-# **CREATE TABLE DB (DONT EXECUTE IF YOU HAVE A TABLE, THE EXECUTE DROP THE TABLE AND CREATE IT AGAIN)**
+# **CREATE TABLE DB (DONT EXECUTE IF YOU HAVE A TABLE, THE EXECUTE WILL DROP THE TABLE AND CREATE IT AGAIN)**
 #create_db = StructTableDbUsers()
 #create_db.create_table()
 
@@ -175,10 +176,16 @@ async def two_factor_page(request: Request, id: str = Query(...)):
 async def validate_data_register_user(input: TokenInputSchema):
      try:
           input_token = input.token
+          id = input.id
           
           if not validate_token(input_token):
                raise HTTPException(status_code=400, detail='Error: Invalid token')
 
+          priv_key, pub_key = generate_pair_keys()
+          update_new_data = UpdateDataDbUsers()
+
+          update_new_data.update_pairkeys_activate_user_db(id, pub_key, priv_key)
+               
           return {'message': 'Valid token'}
      except HTTPException as e:
           logger.error(f'HTTPException: {e.detail}')
