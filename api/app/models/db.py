@@ -55,8 +55,8 @@ class StructTableDbUsers():
                         province VARCHAR(50) NOT NULL,
                         genre VARCHAR(10),
                         number_tel VARCHAR(15) NOT NULL,
-                        pub_key VARBINARY(500),
-                        priv_key VARBINARY(500),
+                        pub_key VARBINARY(294),
+                        priv_key VARBINARY(1232),
                         regist_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                         activate TINYINT(1)
                     );""")
@@ -250,5 +250,47 @@ class ShowsDataDbUsers():
         else:
             logger.error('Connection to the database failed.')
 
-    
+
+# UPDATE
+class UpdateDataDbUsers():
+    def __init__(self):
+        self.host = "db_host"
+        self.user, self.password = get_credentials()
+        self.database = "db_electionxchain"
+
+    def cnx(self):
+        try:
+            mydb = MySQLdb.connect(
+                host = self.host,
+                user = self.user,
+                passwd = self.password,
+                db = self.database
+            )
+            logger.info('Successful connection to the DB')
+            return mydb
+        except MySQLdb.Error as err:
+            logger.error(f'Error: {err}')
+            return None
+        
+    def update_pairkeys_activate_user_db(self, id, pub_key, priv_key):
+        mydb = self.cnx()
+        if mydb:
+            try:
+                with mydb.cursor() as cursor:
+                    sql = "UPDATE users SET pub_key = %s, priv_key = %s, activate = 1 WHERE id = %s;"
+                    val = (
+                        pub_key,
+                        priv_key,
+                        id
+                    )
+                    cursor.execute(sql, val)
+                    mydb.commit()
+                    logger.info('Update Successfully')
+            except MySQLdb.Error as err:
+                logger.error(f'Error to update new data: {err}')
+            finally:
+                mydb.close()
+                logger.info('Database connection closed')
+        else:
+            logger.error('Connection to the database failed.')
     
