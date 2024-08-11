@@ -1,3 +1,8 @@
 __pycache__
 .env
 custom.cnf
+system_keys.py
+system_private_key.pem
+system_public_key.pem
+prueba.py
+api/app/asimetricEncript.py
