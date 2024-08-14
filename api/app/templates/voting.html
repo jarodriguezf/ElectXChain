@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting page</title>
+    <link rel="stylesheet" href="/app/static/css/voting.css">
+</head>
+<body>
+    <div class="welcome-container">
+        <h2>Welcome to the Voting Page!</h2>
+        <p>Votant with DNI: {{ dni }}</p>
+    </div>
+    <div class="voting-container">
+        <h1>Parties Running For Election</h1>
+        <form id="votingForm">
+            <div class="voting-grid">
+                <div class="voting-party">
+                    <img src="/app/static/images/partyA.jpg" alt="Party A">
+                    <label>
+                        <input type="radio" name="party" value="Party A">
+                        Vote for Party A
+                    </label>
+                </div>
+                <div class="voting-party">
+                    <img src="/app/static/images/partyB.jpg" alt="Party B">
+                    <label>
+                        <input type="radio" name="party" value="Party B">
+                        Vote for Party B
+                    </label>
+                </div>
+                <div class="voting-party">
+                    <img src="/app/static/images/partyC.jpg" alt="Party C">
+                    <label>
+                        <input type="radio" name="party" value="Party C">
+                        Vote for Party C
+                    </label>
+                </div>
+                <div class="voting-party">
+                    <img src="/app/static/images/partyD.jpg" alt="Party D">
+                    <label>
+                        <input type="radio" name="party" value="Party D">
+                        Vote for Party D
+                    </label>
+                </div>
+                <div class="voting-party">
+                    <img src="/app/static/images/partyE.jpg" alt="Party E">
+                    <label>
+                        <input type="radio" name="party" value="Party E">
+                        Vote for Party E
+                    </label>
+                </div>
+            </div>
+            <br>
+            <hr>
+            <br>
+            <button type="submit" id="submitBtn" class="voting-btn" disabled>Vote</button>
+        </form>
+    </div>
+
+    <script src="/app/static/js/voting_script.js"></script>
+
+</body>
+</html>
