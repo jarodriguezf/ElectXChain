@@ -250,6 +250,30 @@ class ShowsDataDbUsers():
         else:
             logger.error('Connection to the database failed.')
 
+    # FETCH DNI FOR A GIVEN ID 
+    def show_dni_user(self, id):
+        mydb = self.cnx()
+        if mydb:
+            try:
+                with mydb.cursor() as cursor:
+                    sql = "SELECT dni FROM users where id = %s"
+                    cursor.execute(sql, (id,))
+                    result = cursor.fetchone()
+                    if result:
+                        dni = result[0]
+                        logger.info(f'Successfully fetched dni: {dni}')
+                        return dni
+                    else:
+                        logger.error(f'Error: No dni found for ID {id}')
+                        return None
+            except MySQLdb.Error as err:
+                logger.error(f'Error to fetching the dni: {err}')
+            finally:
+                mydb.close()
+                logger.info('Database connection closed')
+        else:
+            logger.error('Connection to the database failed.')
+
 
 # UPDATE
 class UpdateDataDbUsers():
