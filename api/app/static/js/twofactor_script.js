@@ -25,9 +25,12 @@ document.getElementById('twofactorForm').addEventListener('submit', async functi
             handleError(response.status, errorData.detail);
             
         } else {
-            const data = await response.json();
-            console.log('Success:', data);
-            alert('Token activated!');
+            const result = await response.json();
+            console.log('Success:', result);
+            if (result.id) {
+                alert('Code activated successfully.')
+                window.location.href = `/page_voting?id=${result.id}`;
+            }
         }
     } catch (error) {
         console.error('Error:', error);
