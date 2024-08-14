@@ -186,10 +186,27 @@ async def validate_data_register_user(input: TokenInputSchema):
 
           update_new_data.update_pairkeys_activate_user_db(id, pub_key, priv_key)
                
-          return {'message': 'Valid token'}
+          return {'message': 'Valid token', 'id':id}
      except HTTPException as e:
           logger.error(f'HTTPException: {e.detail}')
           raise e
+     except Exception as e:
+          logger.error(f'Unexpected error: {e}')
+          raise HTTPException(status_code=500, detail='Internal Server Error')
+     
+
+# VOTING PAGE
+@app.get("/page_voting", response_class = HTMLResponse)
+async def voting_page(request: Request, id: str = Query(...)):
+     try:
+          logger.debug(f'Received id: {id}')
+          get_dni = ShowsDataDbUsers()
+          dni = get_dni.show_dni_user(id)
+
+          return templates.TemplateResponse("voting.html", {"request": request, "dni": dni})
+     except TypeError as e:
+          logger.error(f'Error: {e}')
+          raise HTTPException(status_code=500, detail="Internal Server Error")
      except Exception as e:
           logger.error(f'Unexpected error: {e}')
           raise HTTPException(status_code=500, detail='Internal Server Error')
