@@ -8,6 +8,7 @@ from app.register import dni_nie_validation, is_adult
 from app.models.user import User,  UserSchema, UserAutSchema, PhoneNumberSchema
 from app.models.db import ShowsDataDbUsers, InsertDataDbUsers,UpdateDataDbUsers, StructTableDbUsers
 from app.models.two_factor import TokenSchema, TokenInputSchema
+from app.models.voting import VoteSchema
 from app.autentication import get_token, validate_token
 from app.asimetricEncript import generate_pair_keys
 import asyncio
@@ -52,7 +53,7 @@ async def save_data_user(user: UserSchema):
           showsData = ShowsDataDbUsers()
 
           user_instance = User(**user.dict())
-          logger.debug(f"Received user instance: {user_instance.get_user()}")
+          #logger.debug(f"Received user instance: {user_instance.get_user()}")
 
           # VALIDATION FIELDS
           if not dni_nie_validation(user_instance.dni):
@@ -203,10 +204,44 @@ async def voting_page(request: Request, id: str = Query(...)):
           get_dni = ShowsDataDbUsers()
           dni = get_dni.show_dni_user(id)
 
-          return templates.TemplateResponse("voting.html", {"request": request, "dni": dni})
+          return templates.TemplateResponse("voting.html", {"request": request, "dni": dni, 'id': id})
      except TypeError as e:
           logger.error(f'Error: {e}')
           raise HTTPException(status_code=500, detail="Internal Server Error")
+     except Exception as e:
+          logger.error(f'Unexpected error: {e}')
+          raise HTTPException(status_code=500, detail='Internal Server Error')
+     
+
+# FINAL CHECK IF THE USER HAVE HIS PROFILE CORRECTLY (ACTIVATE AND SENT THE VOTE TO KAFKA FOR HIS PROCESS)
+@app.post("/submit_vote")
+async def is_activate(input: VoteSchema):
+     try:
+          logger.debug(f'Data from voting page: {input.id, input.vote}')
+          validate_votant = ShowsDataDbUsers()
+          update_votant = UpdateDataDbUsers()
+
+          if not validate_votant.show_activate_exists(input.id):
+               logger.error('Error: The user are not activated or not exists in the system')
+               raise HTTPException(status_code=500, detail='User not activated')
+          if not validate_votant.show_voted_exists(input.id):
+               logger.error('Error: The user has voted previously')
+               raise HTTPException(status_code=400, detail='User has already voted prevously')
+          
+          update_votant.update_voted_user_db(input.id)
+          return {'message':'vote send successfully'}
+     except HTTPException as e:
+          raise e
+     except Exception as e:
+          logger.error(f'Unexpected error: {e}')
+          raise HTTPException(status_code=500, detail='Internal Server Error')
+     
+
+# FINAL PAGE (THE USER WILL NO LONGER INTERACT WITH THE SYSTEM)
+@app.get("/page_final", response_class = HTMLResponse)
+async def final_page(request: Request):
+     try:
+          return templates.TemplateResponse("final.html", {"request": request})
      except Exception as e:
           logger.error(f'Unexpected error: {e}')
           raise HTTPException(status_code=500, detail='Internal Server Error')
