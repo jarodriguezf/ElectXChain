@@ -58,7 +58,8 @@ class StructTableDbUsers():
                         pub_key VARBINARY(294),
                         priv_key VARBINARY(1232),
                         regist_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                        activate TINYINT(1)
+                        activate TINYINT(1),
+                        voted TINYINT(1)
                     );""")
                     
                     mydb.commit()
@@ -98,7 +99,7 @@ class InsertDataDbUsers():
         if mydb:
             try:
                 with mydb.cursor() as cursor:
-                    sql = "INSERT INTO users (name, dni, birth, province, genre, number_tel, pub_key, priv_key, activate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
+                    sql = "INSERT INTO users (name, dni, birth, province, genre, number_tel, pub_key, priv_key, activate, voted) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
                     val = (
                         user_instance.name,
                         user_instance.dni,
@@ -108,7 +109,8 @@ class InsertDataDbUsers():
                         user_instance.number_tel,
                         user_instance.pub_key,
                         user_instance.priv_key,
-                        user_instance.activate
+                        user_instance.activate,
+                        user_instance.voted
                     )
 
                     cursor.execute(sql, val)
@@ -273,6 +275,50 @@ class ShowsDataDbUsers():
                 logger.info('Database connection closed')
         else:
             logger.error('Connection to the database failed.')
+    
+    # VALIDATE IF ACTIVATE = 1 OR NOT
+    def show_activate_exists(self, id):
+        mydb = self.cnx()
+        if mydb:
+            try:
+                with mydb.cursor() as cursor:
+                    sql = "SELECT count(*) FROM users where id = %s and activate = 1;"
+                    cursor.execute(sql, (id,))
+                    result = cursor.fetchone()
+                    if result[0] <= 0:
+                        logger.error(f'Error: No activated found for ID {id}')
+                        return False
+                    logger.info(f'Successfully fetched activated for id: {id}')
+                    return True
+            except MySQLdb.Error as err:
+                logger.error(f'Error to fetching the activated: {err}')
+            finally:
+                mydb.close()
+                logger.info('Database connection closed')
+        else:
+            logger.error('Connection to the database failed.')
+
+    # VALIDATE IF VOTED = 0 OR 1
+    def show_voted_exists(self, id):
+        mydb = self.cnx()
+        if mydb:
+            try:
+                with mydb.cursor() as cursor:
+                    sql = "SELECT voted FROM users where id = %s;"
+                    cursor.execute(sql, (id,))
+                    result = cursor.fetchone()
+                    if result[0] > 0:
+                        logger.error(f'Error: Voted found for ID {id}')
+                        return False
+                    logger.info(f'Voted not found for ID: {id}')
+                    return True
+            except MySQLdb.Error as err:
+                logger.error(f'Error to find the voted: {err}')
+            finally:
+                mydb.close()
+                logger.info('Database connection closed')
+        else:
+            logger.error('Connection to the database failed.')
 
 
 # UPDATE
@@ -295,7 +341,8 @@ class UpdateDataDbUsers():
         except MySQLdb.Error as err:
             logger.error(f'Error: {err}')
             return None
-        
+    
+    # UPDATE THE PAIR KEYS (ASIMETRIC ENCRYPT FOR THE USERS)
     def update_pairkeys_activate_user_db(self, id, pub_key, priv_key):
         mydb = self.cnx()
         if mydb:
@@ -308,6 +355,24 @@ class UpdateDataDbUsers():
                         id
                     )
                     cursor.execute(sql, val)
+                    mydb.commit()
+                    logger.info('Update Successfully')
+            except MySQLdb.Error as err:
+                logger.error(f'Error to update new data: {err}')
+            finally:
+                mydb.close()
+                logger.info('Database connection closed')
+        else:
+            logger.error('Connection to the database failed.')
+
+    # UPDATE THE VOTED TO 1 IF THE USER HAS VOTED
+    def update_voted_user_db(self, id):
+        mydb = self.cnx()
+        if mydb:
+            try:
+                with mydb.cursor() as cursor:
+                    sql = "UPDATE users SET voted = 1 WHERE id = %s;"
+                    cursor.execute(sql, (id,))
                     mydb.commit()
                     logger.info('Update Successfully')
             except MySQLdb.Error as err:
