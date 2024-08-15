@@ -18,35 +18,35 @@
                 <div class="voting-party">
                     <img src="/app/static/images/partyA.jpg" alt="Party A">
                     <label>
-                        <input type="radio" name="party" value="Party A">
+                        <input type="radio" name="party" value="Party_A">
                         Vote for Party A
                     </label>
                 </div>
                 <div class="voting-party">
                     <img src="/app/static/images/partyB.jpg" alt="Party B">
                     <label>
-                        <input type="radio" name="party" value="Party B">
+                        <input type="radio" name="party" value="Party_B">
                         Vote for Party B
                     </label>
                 </div>
                 <div class="voting-party">
                     <img src="/app/static/images/partyC.jpg" alt="Party C">
                     <label>
-                        <input type="radio" name="party" value="Party C">
+                        <input type="radio" name="party" value="Party_C">
                         Vote for Party C
                     </label>
                 </div>
                 <div class="voting-party">
                     <img src="/app/static/images/partyD.jpg" alt="Party D">
                     <label>
-                        <input type="radio" name="party" value="Party D">
+                        <input type="radio" name="party" value="Party_D">
                         Vote for Party D
                     </label>
                 </div>
                 <div class="voting-party">
                     <img src="/app/static/images/partyE.jpg" alt="Party E">
                     <label>
-                        <input type="radio" name="party" value="Party E">
+                        <input type="radio" name="party" value="Party_E">
                         Vote for Party E
                     </label>
                 </div>
@@ -54,8 +54,19 @@
             <br>
             <hr>
             <br>
-            <button type="submit" id="submitBtn" class="voting-btn" disabled>Vote</button>
+            <input type="hidden" id="id" name="id" value="{{ id }}">
+            <button type="button" id="submitBtn" class="voting-btn" disabled>Vote</button>
         </form>
+    </div>
+
+    <!--Modal confirmation of the vote-->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="modalText">¿Are you sure to vote for that party?</p>
+            <button id="confirmVote" class="voting-btn">Yes</button>
+            <button id="cancelVote" class="voting-btn">No</button>
+        </div>
     </div>
 
     <script src="/app/static/js/voting_script.js"></script>
