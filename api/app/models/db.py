@@ -2,6 +2,7 @@ import MySQLdb
 import os
 import sys
 import logging
+import hashlib
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -15,6 +16,12 @@ def get_credentials():
     if not USER or not PASSWORD:
         raise ValueError('Database credentials are not set in enviroment variables')
     return USER, PASSWORD
+
+# FUNCITON TO HASING THE VOTE (UPDATE CLASS)
+def compute_sha256_hash(data):
+    sha256 = hashlib.sha256()
+    sha256.update(data)
+    return sha256.hexdigest()
 
 
 # CLASS CREATE STRUCTURE IN DB
@@ -59,6 +66,7 @@ class StructTableDbUsers():
                         priv_key VARBINARY(1232),
                         regist_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                         activate TINYINT(1),
+                        voted_hash CHAR(64),
                         voted TINYINT(1)
                     );""")
                     
@@ -99,7 +107,7 @@ class InsertDataDbUsers():
         if mydb:
             try:
                 with mydb.cursor() as cursor:
-                    sql = "INSERT INTO users (name, dni, birth, province, genre, number_tel, pub_key, priv_key, activate, voted) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+                    sql = "INSERT INTO users (name, dni, birth, province, genre, number_tel, pub_key, priv_key, activate, voted_hash, voted) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
                     val = (
                         user_instance.name,
                         user_instance.dni,
@@ -110,6 +118,7 @@ class InsertDataDbUsers():
                         user_instance.pub_key,
                         user_instance.priv_key,
                         user_instance.activate,
+                        user_instance.voted_hash,
                         user_instance.voted
                     )
 
@@ -319,6 +328,29 @@ class ShowsDataDbUsers():
                 logger.info('Database connection closed')
         else:
             logger.error('Connection to the database failed.')
+    
+
+    # GET THE PRIVATE ENCRYPTED KEY OF THE USER
+    def show_priv_key_user(self, id):
+        mydb = self.cnx()
+        if mydb:
+            try:
+                with mydb.cursor() as cursor:
+                    sql = "SELECT priv_key FROM users where id = %s;"
+                    cursor.execute(sql, (id,))
+                    result = cursor.fetchone()
+                    if result is None or len(result[0]) == 0:
+                        logger.error(f'Error: Priv key not found for ID {id}')
+                        return None
+                    logger.info(f'Priv key found for ID: {id}')
+                    return result[0]
+            except MySQLdb.Error as err:
+                logger.error(f'Error to find the Priv key: {err}')
+            finally:
+                mydb.close()
+                logger.info('Database connection closed')
+        else:
+            logger.error('Connection to the database failed.')
 
 
 # UPDATE
@@ -373,6 +405,28 @@ class UpdateDataDbUsers():
                 with mydb.cursor() as cursor:
                     sql = "UPDATE users SET voted = 1 WHERE id = %s;"
                     cursor.execute(sql, (id,))
+                    mydb.commit()
+                    logger.info('Update Successfully')
+            except MySQLdb.Error as err:
+                logger.error(f'Error to update new data: {err}')
+            finally:
+                mydb.close()
+                logger.info('Database connection closed')
+        else:
+            logger.error('Connection to the database failed.')
+
+
+    # UPDATE THE HASHED VOTE
+    def update_hash_vote_user_db(self, id, vote):
+        mydb = self.cnx()
+        if mydb:
+            try:
+                vote_hash_hex = compute_sha256_hash(vote.encode('utf-8'))
+                
+                with mydb.cursor() as cursor:
+                    sql = "UPDATE users SET voted_hash = %s WHERE id = %s;"
+                    val=(vote_hash_hex, id)
+                    cursor.execute(sql, val)
                     mydb.commit()
                     logger.info('Update Successfully')
             except MySQLdb.Error as err:
