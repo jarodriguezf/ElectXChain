@@ -6,3 +6,5 @@ system_private_key.pem
 system_public_key.pem
 prueba.py
 api/app/asimetricEncript.py
+api/app/voting.py
+api/tests
