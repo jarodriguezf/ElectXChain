@@ -16,6 +16,7 @@ services:
     volumes:
       - ./api/run.py:/back-api/run.py
       - ./api/app:/back-api/app
+      - ./system_public_key.pem:/back-api/system_public_key.pem
     depends_on:
       db:
         condition: service_healthy
