@@ -24,11 +24,12 @@ class UserSchema(BaseModel):
     pub_key: Optional[bytes] = None
     priv_key: Optional[bytes] = None
     activate: int = 0
+    voted_hash: str = None
     voted: int = 0
 
 class User():
     def __init__(self, name: str, dni: str, birth: date, province: str, genre: str, number_tel: int, pub_key: Optional[bytes], 
-                priv_key: Optional[bytes], activate: int = 0, voted: int = 0):
+                priv_key: Optional[bytes], activate: int = 0, voted_hash: str = None, voted: int = 0):
         self.name = name
         self.dni = dni
         self.birth = birth
@@ -38,6 +39,7 @@ class User():
         self.pub_key = pub_key
         self.priv_key = priv_key
         self.activate = activate
+        self.voted_hash = voted_hash
         self.voted = voted
 
     def get_user(self):
