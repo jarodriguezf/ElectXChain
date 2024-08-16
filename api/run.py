@@ -11,6 +11,7 @@ from app.models.two_factor import TokenSchema, TokenInputSchema
 from app.models.voting import VoteSchema
 from app.autentication import get_token, validate_token
 from app.asimetricEncript import generate_pair_keys
+from app.voting import sign_vote_by_priv_key
 import asyncio
 from typing import Optional
 import time
@@ -143,7 +144,7 @@ async def simulate_sms(request: TokenSchema):
                number_tel = showsData.show_numberTel_user(id)
 
           if number_tel:
-               logger.debug(f"Fetching number_tel - {number_tel} - for ID - {id} -")
+               #logger.debug(f"Fetching number_tel - {number_tel} - for ID - {id} -")
                logger.info(f"📲 Simulating the sending of SMS to {number_tel}...")
           else:
                raise HTTPException(status_code=400, detail='Either data_number or id must be provided')
@@ -200,7 +201,7 @@ async def validate_data_register_user(input: TokenInputSchema):
 @app.get("/page_voting", response_class = HTMLResponse)
 async def voting_page(request: Request, id: str = Query(...)):
      try:
-          logger.debug(f'Received id: {id}')
+          #logger.debug(f'Received id: {id}')
           get_dni = ShowsDataDbUsers()
           dni = get_dni.show_dni_user(id)
 
@@ -217,18 +218,28 @@ async def voting_page(request: Request, id: str = Query(...)):
 @app.post("/submit_vote")
 async def is_activate(input: VoteSchema):
      try:
-          logger.debug(f'Data from voting page: {input.id, input.vote}')
-          validate_votant = ShowsDataDbUsers()
+          #logger.debug(f'Data from voting page: {input.id, input.vote}')
+          shows_votant = ShowsDataDbUsers()
           update_votant = UpdateDataDbUsers()
 
-          if not validate_votant.show_activate_exists(input.id):
+          if not shows_votant.show_activate_exists(input.id):
                logger.error('Error: The user are not activated or not exists in the system')
                raise HTTPException(status_code=500, detail='User not activated')
-          if not validate_votant.show_voted_exists(input.id):
+          if not shows_votant.show_voted_exists(input.id):
                logger.error('Error: The user has voted previously')
                raise HTTPException(status_code=400, detail='User has already voted prevously')
           
+          # UPDATE THE FIELDS (voted, voted_hash)
+          update_votant.update_hash_vote_user_db(input.id, input.vote)
           update_votant.update_voted_user_db(input.id)
+
+          concat_priv_key = shows_votant.show_priv_key_user(input.id)
+          if concat_priv_key is None:
+               logger.error('Error: The user have not set the private key in db')
+               raise HTTPException(status_code=500, detail='Not private key found')
+
+          sign_vote_by_priv_key(concat_priv_key, input.vote)
+          #logger.debug(f'SIGNATURE ENCRYPT: {encrypt_signature}')
           return {'message':'vote send successfully'}
      except HTTPException as e:
           raise e
