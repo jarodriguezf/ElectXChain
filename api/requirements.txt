@@ -4,3 +4,4 @@ jinja2
 mysqlclient
 pyotp
 cryptography
+confluent-kafka
