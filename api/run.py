@@ -1,3 +1,7 @@
+import sys
+import os
+parentddir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+sys.path.append(parentddir)
 import logging
 from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -5,16 +9,16 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 from app.register import dni_nie_validation, is_adult
-from app.models.user import User,  UserSchema, UserAutSchema, PhoneNumberSchema
+from app.models.user import User,  UserSchema, UserAutSchema
 from app.models.db import ShowsDataDbUsers, InsertDataDbUsers,UpdateDataDbUsers, StructTableDbUsers
 from app.models.two_factor import TokenSchema, TokenInputSchema
 from app.models.voting import VoteSchema
 from app.autentication import get_token, validate_token
 from app.asimetricEncript import generate_pair_keys
 from app.voting import sign_vote_by_priv_key
+from kafka.producer import send_to_kafka
 import asyncio
-from typing import Optional
-import time
+
 
 app = FastAPI()
 
@@ -238,8 +242,10 @@ async def is_activate(input: VoteSchema):
                logger.error('Error: The user have not set the private key in db')
                raise HTTPException(status_code=500, detail='Not private key found')
 
-          sign_vote_by_priv_key(concat_priv_key, input.vote)
-          #logger.debug(f'SIGNATURE ENCRYPT: {encrypt_signature}')
+          signature_user_vote = sign_vote_by_priv_key(concat_priv_key, input.vote)
+          #logger.debug(f'SIGNATURE ENCRYPT: {signature_user_vote}')
+          # SEND THE DATA AND VOTE TO KAFKA
+          asyncio.create_task(send_to_kafka(signature_user_vote, input.id))
           return {'message':'vote send successfully'}
      except HTTPException as e:
           raise e
