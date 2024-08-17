@@ -17,6 +17,7 @@ services:
       - ./api/run.py:/back-api/run.py
       - ./api/app:/back-api/app
       - ./system_public_key.pem:/back-api/system_public_key.pem
+      - ./kafka:/back-api/kafka
     depends_on:
       db:
         condition: service_healthy
@@ -47,6 +48,40 @@ services:
       ElectXChain_network:
         aliases:
           - "db_host"
+
+  kafka:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      KAFKA_LISTENER_NAME: INSIDE
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    networks:
+      ElectXChain_network:
+        aliases:
+          - "kafka_host"
+
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      ElectXChain_network:
+        aliases:
+          - "zook_host"
 
 networks: 
   ElectXChain_network:
