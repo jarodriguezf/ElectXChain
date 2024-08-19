@@ -17,7 +17,8 @@ services:
       - ./api/run.py:/back-api/run.py
       - ./api/app:/back-api/app
       - ./system_public_key.pem:/back-api/system_public_key.pem
-      - ./kafka:/back-api/kafka
+      - ./kafka/producer.py:/back-api/kafka/producer.py
+      - ./kafka/config.py:/back-api/kafka/config.py
     depends_on:
       db:
         condition: service_healthy
@@ -67,6 +68,17 @@ services:
       ElectXChain_network:
         aliases:
           - "kafka_host"
+
+  consumer_kafka:
+    build:
+      context: ./kafka
+      dockerfile: Dockerfile
+    depends_on:
+      - kafka
+    networks:
+      ElectXChain_network:
+        aliases:
+          - "consumer_kafka_host"
 
   zookeeper:
     image: wurstmeister/zookeeper:latest
