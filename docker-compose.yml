@@ -61,6 +61,14 @@ services:
       KAFKA_LISTENER_NAME: INSIDE
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSETS_RETENTION_MINUTES: 1440
+      # logs
+      KAFKA_LOG_RETENTION_HOURS: 0
+      KAFKA_LOG_RETENTION_BYTES: 1024
+      KAFKA_LOG_SEGMENT_BYTES: 1024
+      KAFKA_LOG_RETENTION_MS: 1
+    volumes:
+      - /dev/null:/kafka/logs
     depends_on:
       zookeeper:
         condition: service_healthy
@@ -68,17 +76,11 @@ services:
       ElectXChain_network:
         aliases:
           - "kafka_host"
-
-  consumer_kafka:
-    build:
-      context: ./kafka
-      dockerfile: Dockerfile
-    depends_on:
-      - kafka
-    networks:
-      ElectXChain_network:
-        aliases:
-          - "consumer_kafka_host"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
 
   zookeeper:
     image: wurstmeister/zookeeper:latest
@@ -94,6 +96,34 @@ services:
       ElectXChain_network:
         aliases:
           - "zook_host"
+
+  spark:
+    image: bitnami/spark:3.2.0
+    environment:
+      - SPARK_MODE=master
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+    networks:
+      ElectXChain_network:
+        aliases:
+          - "spark_host"
+
+  spark_script:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    environment:
+      - SPARK_MASTER=spark:/spark:7077
+    depends_on:
+      - spark
+    volumes:
+      - ./spark/spark_process.py:/app/spark_process.py
+    networks:
+      ElectXChain_network:
+        aliases:
+          - "spark_process_host"
 
 networks: 
   ElectXChain_network:
