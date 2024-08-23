@@ -8,3 +8,4 @@ prueba.py
 api/app/asimetricEncript.py
 api/app/voting.py
 api/tests
+log4j.properties
