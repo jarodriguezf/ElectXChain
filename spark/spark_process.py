@@ -1,10 +1,12 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.utils import AnalysisException
+from send_redis_data import store_in_redis
+from pyspark.sql.functions import col, length
 import logging
 import time
 
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.ERROR,
                      format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('py4j')
 logger.setLevel(logging.ERROR)
@@ -34,7 +36,7 @@ def read_from_stream_kafka(spark):
             .format("kafka") \
             .option("kafka.bootstrap.servers", "kafka_host:9093") \
             .option("subscribe", "vote_passthrough") \
-            .option("startingOffsets", "earliest") \
+            .option("startingOffsets", "latest") \
             .load()
         logger.info('Data successfully read from kafka stream')
         return kafka_stream
@@ -44,16 +46,6 @@ def read_from_stream_kafka(spark):
     except Exception as e:
         logger.error(f'Error: Unexpected error - {str(e)}')
         raise e
-
-
-# PAUSE 10 SECOND UNTIL PROCESS THE NEXT DATA
-def process_batch(df, epoch_id):
-    logger.info(f'Processing batch {epoch_id}')
-    try:
-        df.show(truncate=False)
-        time.sleep(10) 
-    except Exception as e:
-        logger.error(f'Error: Failed to process batch - {str(e)}')
 
 
 # CASTING THE DATA IN DF
@@ -70,17 +62,29 @@ def casting_data(kafka_stream):
         raise e
 
 
+# VERIFICATION DATA INTEGRITY
+def df_verification_and_validation(df):
+    df = df.withColumn("is_valid", 
+                       (col('key').isNotNull()) & 
+                       (col('key').cast('string').isNotNull()) &
+                       (col('value').isNotNull()))
+
+    return df
+
+
 # PRINT THE VALUES IN CONSOLE
-def print_values_from_kafka():
+def write_values_from_kafka():
     spark = spark_session()
     kafka_stream = read_from_stream_kafka(spark)
     df = casting_data(kafka_stream)
+    df = df_verification_and_validation(df)
+
+    valid_df = df.filter(col("is_valid") == True)
 
     try:
-        query = df.writeStream \
-            .foreachBatch(process_batch) \
+        query = valid_df.writeStream \
+            .foreachBatch(store_in_redis) \
             .outputMode("append") \
-            .format("console") \
             .start()
 
         logger.info('Streaming query started')
@@ -95,4 +99,4 @@ def print_values_from_kafka():
         spark.stop()
 
 if __name__ == '__main__':
-    print_values_from_kafka()
+    write_values_from_kafka()
