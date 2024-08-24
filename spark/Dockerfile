@@ -8,7 +8,8 @@ RUN mkdir -p /tmp/spark /tmp/spark/logs && \
     chown -R 1001:1001 /tmp/spark /tmp/spark/logs
 
 
-RUN pip install pyspark kafka-python
+RUN pip install pyspark kafka-python \
+    redis
 
 COPY log4j.properties /opt/bitnami/spark/conf/
 
