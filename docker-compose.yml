@@ -116,14 +116,44 @@ services:
       dockerfile: Dockerfile
     environment:
       - SPARK_MASTER=spark:/spark:7077
+      - REDIS_HOST=redis_host
+      - REDIS_PORT=6379
     depends_on:
       - spark
+      - redis
     volumes:
       - ./spark/spark_process.py:/app/spark_process.py
+      - ./spark/send_redis_data.py:/app/send_redis_data.py
     networks:
       ElectXChain_network:
         aliases:
           - "spark_process_host"
+
+  redis:
+    image: redis:latest
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    networks:
+      ElectXChain_network:
+        aliases:
+          - "redis_host"
+
+  # GUI REDIS 
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      ElectXChain_network:
+        aliases:
+          - "redis_commander"
 
 networks: 
   ElectXChain_network:
