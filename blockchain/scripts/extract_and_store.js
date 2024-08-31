@@ -26,26 +26,26 @@ const ensureRedisConnection = async () => {
   }
 };
 
-// BINARY DATA PROCESSING
+// PROCESSING OF DATA AND SAVING IN THE BLOCKCHAIN
 const processBinaryData = async (key, buffer, contract) => {
   console.log('Processing binary data for key:', key);
   
-  // SEND DATA TO THE BLOCKCHAIN
   try {
+
     const dataBytes = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
 
-    const tx = await contract.storeData(key, dataBytes); //CALL TO SEND DATA
+    const tx = await contract.storeData(key, dataBytes); //CALL storeData TO SAVED THE DATA (CONTRACT)
     const receipt = await tx.wait();
 
     if (receipt.status !== 1) {
       throw new Error(`Transaction failed for key ${key}`);
     }
-    console.debug('Transaction confirmed');
+    console.info('Transaction confirmed');
 
-    // CALL getData TO RETRIEVE THE STORED DATA
-    const storedData = await contract.getData(key); // CALL TO GET DATA
-    const decodedValue = ethers.utils.toUtf8String(storedData);
-    console.debug(`Data retrieved from blockchain for key ${key}:`, decodedValue);
+    // CALL getData TO RETRIEVE THE STORED DATA (CONTRACT)
+    const storedData = await contract.getData(key);
+    //const decodedValue = ethers.utils.toUtf8String(storedData);
+    console.debug(`Data retrieved from blockchain for key ${key}:`, storedData);
 
   } catch (error) {
     console.error(`Error storing or retrieving data in blockchain for key ${key}:`, error.message);
