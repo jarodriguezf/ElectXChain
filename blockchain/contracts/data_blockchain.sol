@@ -8,6 +8,8 @@ contract data_blockchain {
 
     // STORE NEW DATA IN THE MAPPER OBJECT
     function storeData(string calldata key, bytes calldata value) external {
+        require(data[key].length == 0, "Data for this key already exists"); // CHECK IF THE KEY HAS ALREADY STORED
+
         // SAVE THE VALUE
         data[key] = value;
         emit DataStored(key, value);
