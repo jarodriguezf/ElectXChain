@@ -9,3 +9,11 @@ api/app/asimetricEncript.py
 api/app/voting.py
 api/tests
 log4j.properties
+node_modules
+cache
+artifacts
+.dockerenv
+hardhat.config.js
+package-lock.json
+package.json
+deployments.json
