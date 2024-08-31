@@ -155,6 +155,54 @@ services:
         aliases:
           - "redis_commander"
 
+  hardhat:
+    build: 
+      context: ./blockchain
+      dockerfile: Dockerfile-hardhat
+    ports:
+      - "8545:8545"
+    volumes:
+      - ./blockchain:/app
+    stdin_open: true
+    tty: true
+    entrypoint: ["sh", "-c", "npx hardhat node"]
+    networks:
+      ElectXChain_network:
+        aliases:
+          - "hardhatnode_host"
+
+  hardhat-deployer:
+    build: 
+      context: ./blockchain
+      dockerfile: Dockerfile-hardhat
+    depends_on:
+      - hardhat
+    volumes:
+      - ./blockchain:/app
+    entrypoint: ["sh", "-c", "npx hardhat compile && npx hardhat run scripts/deploy.js --network hardhatnode_host"]
+    networks:
+      ElectXChain_network:
+        aliases:
+          - "hardhat-deployer_host"
+
+  hardhat-monitor:
+    build:
+      context: ./blockchain
+      dockerfile: Dockerfile-monitor
+    environment:
+      - REDIS_HOST=redis_host
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+      - hardhat
+    volumes:
+      - ./blockchain:/app
+    command: sh -c "sleep 60 && npx hardhat run scripts/extract_and_store.js --network hardhatnode_host"
+    networks:
+      ElectXChain_network:
+        aliases:
+          - "hardhat-monitor_host"
+
 networks: 
   ElectXChain_network:
     name: Elect_net 
