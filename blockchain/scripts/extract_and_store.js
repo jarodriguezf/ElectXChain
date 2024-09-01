@@ -2,6 +2,7 @@ const fs = require('fs');
 const { ethers } = require('hardhat');
 const redis = require('redis');
 const path = require('path');
+const { sendToKafka } = require('./producer_2');
 
 const redisHost = process.env.REDIS_HOST || 'localhost';
 const redisPort = parseInt(process.env.REDIS_PORT, 10) || 6379;
@@ -44,11 +45,16 @@ const processBinaryData = async (key, buffer, contract) => {
 
     // CALL getData TO RETRIEVE THE STORED DATA (CONTRACT)
     const storedData = await contract.getData(key);
-    //const decodedValue = ethers.utils.toUtf8String(storedData);
-    console.debug(`Data retrieved from blockchain for key ${key}:`, storedData);
+    console.debug(`Data retrieved from blockchain for key ${key}`);
+    
+    // SEND THE KEY AND VALUE TO KAFKA PRODUCER
+    const valueBytes = Buffer.isBuffer(storedData) ? buffer : Buffer.from(storedData);
+    console.debug(`Value size: ${valueBytes.length}`);
+    await sendToKafka(key, valueBytes);
+    console.log('Message successfully send to kafka producer: vote_result.');
 
   } catch (error) {
-    console.error(`Error storing or retrieving data in blockchain for key ${key}:`, error.message);
+    console.error(`Error storing or retrieving data in blockchain or kafka for key ${key}:`, error.message);
     if (error.receipt) {
       console.error(`Transaction receipt: ${JSON.stringify(error.receipt)}`);
     }

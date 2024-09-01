@@ -12,12 +12,17 @@ topic_name = 'vote_passthrough'
 num_partitions = 2
 replication_factor = 1
 
-new_topic = NewTopic(topic_name, num_partitions=num_partitions, replication_factor=replication_factor)
+topic_name_2 = 'vote_result'
+num_partitions_2 = 2
+replication_factor_2 = 1
+
+new_topic_1 = NewTopic(topic_name, num_partitions=num_partitions, replication_factor=replication_factor)
+new_topic_2 = NewTopic(topic_name_2, num_partitions=num_partitions_2, replication_factor=replication_factor_2)
 
 # CREATE THE TOPIC
 try:
     # SEND THE VALIDATION FOR CREATE THE TOPIC
-    fs = admin_client.create_topics([new_topic])
+    fs = admin_client.create_topics([new_topic_1, new_topic_2])
     
     for topic, future in fs.items():
         try:
