@@ -1,12 +1,9 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36" version="24.7.7">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36" version="24.7.7">
   <diagram name="Página-1" id="wR5rpg4ATvwhX3SZ5CP1">
-    <mxGraphModel dx="1877" dy="565" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1434" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="TPwAu2DqvQ5dYHGIksQ9-1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;opacity=40;" vertex="1" parent="1">
-          <mxGeometry x="-30" y="180" width="950" height="490" as="geometry" />
-        </mxCell>
         <mxCell id="oyKC4ICt6uIVDYOdOdBO-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="oyKC4ICt6uIVDYOdOdBO-1" target="oyKC4ICt6uIVDYOdOdBO-11" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -39,20 +36,20 @@
             <mxPoint x="240" y="370" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="oyKC4ICt6uIVDYOdOdBO-14" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Kafka Consumer&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+        <mxCell id="oyKC4ICt6uIVDYOdOdBO-14" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Spark Consumer&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="180" y="230" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="sLu-aOIJa3ZzHug4JrmT-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="oyKC4ICt6uIVDYOdOdBO-17" target="sLu-aOIJa3ZzHug4JrmT-16" edge="1">
+        <mxCell id="0I0V-aICoqOOxEZha9os-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="oyKC4ICt6uIVDYOdOdBO-17" target="0I0V-aICoqOOxEZha9os-4">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="oyKC4ICt6uIVDYOdOdBO-17" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;BlockChain&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="570" y="377.5" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="oyKC4ICt6uIVDYOdOdBO-18" value="" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="940" y="367.5" width="120" height="80" as="geometry" />
+          <mxGeometry x="1367.5" y="367.5" width="120" height="80" as="geometry" />
         </mxCell>
         <mxCell id="oyKC4ICt6uIVDYOdOdBO-20" value="&lt;span style=&quot;font-size: 14px;&quot;&gt;End&lt;/span&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="970" y="392.5" width="60" height="30" as="geometry" />
+          <mxGeometry x="1397.5" y="392.5" width="60" height="30" as="geometry" />
         </mxCell>
         <mxCell id="sLu-aOIJa3ZzHug4JrmT-2" value="" style="strokeWidth=1;html=1;shape=mxgraph.flowchart.annotation_1;align=left;pointerEvents=1;" parent="1" vertex="1">
           <mxGeometry x="140" y="350" width="50" height="100" as="geometry" />
@@ -88,24 +85,51 @@
           <mxGeometry x="455" y="310" width="155" height="30" as="geometry" />
         </mxCell>
         <mxCell id="sLu-aOIJa3ZzHug4JrmT-16" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="760" y="377.5" width="120" height="60" as="geometry" />
+          <mxGeometry x="1187.5" y="377.5" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="sLu-aOIJa3ZzHug4JrmT-19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="sLu-aOIJa3ZzHug4JrmT-18" edge="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="940" y="408" as="targetPoint" />
+            <mxPoint x="1367.5" y="408" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="sLu-aOIJa3ZzHug4JrmT-18" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Decrypt the signature and count the votes&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="760" y="377.5" width="120" height="62.5" as="geometry" />
+          <mxGeometry x="1187.5" y="376.25" width="120" height="62.5" as="geometry" />
         </mxCell>
         <mxCell id="sLu-aOIJa3ZzHug4JrmT-20" value="" style="shape=partialRectangle;whiteSpace=wrap;html=1;bottom=1;right=1;left=1;top=0;fillColor=none;routingCenterX=-0.5;" parent="1" vertex="1">
-          <mxGeometry x="745" y="430" width="150" height="60" as="geometry" />
+          <mxGeometry x="1172.5" y="430" width="150" height="60" as="geometry" />
         </mxCell>
         <mxCell id="sLu-aOIJa3ZzHug4JrmT-22" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;The signature will be decrypt and then, validated with the real users vote.&lt;/font&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;- if the real vote (in db) make match with the signature, it is correct.&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;- if the match is not valid, the vote will not count.&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="722.5" y="490" width="195" height="150" as="geometry" />
+          <mxGeometry x="1150" y="490" width="195" height="150" as="geometry" />
         </mxCell>
-        <mxCell id="TPwAu2DqvQ5dYHGIksQ9-2" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Orquestation with Apache Airflow&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="TPwAu2DqvQ5dYHGIksQ9-2" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Orquestation with Apache Airflow&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="350" y="670" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="0I0V-aICoqOOxEZha9os-3" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="770" y="380" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="0I0V-aICoqOOxEZha9os-8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="0I0V-aICoqOOxEZha9os-4" target="0I0V-aICoqOOxEZha9os-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0I0V-aICoqOOxEZha9os-4" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Kafka Producer&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="770" y="377.5" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="0I0V-aICoqOOxEZha9os-6" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="960" y="377.5" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="0I0V-aICoqOOxEZha9os-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="0I0V-aICoqOOxEZha9os-7" target="sLu-aOIJa3ZzHug4JrmT-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0I0V-aICoqOOxEZha9os-7" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Spark Consumer&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="960" y="377.5" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="0I0V-aICoqOOxEZha9os-13" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_1;align=left;pointerEvents=1;rotation=90;" vertex="1" parent="1">
+          <mxGeometry x="805" y="287.5" width="50" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="0I0V-aICoqOOxEZha9os-14" value="second topic" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="790" y="300" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="0I0V-aICoqOOxEZha9os-15" value="&lt;font style=&quot;font-size: 13px;&quot;&gt;first topic&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="300" y="245" width="80" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
