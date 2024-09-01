@@ -16,7 +16,7 @@ from app.models.voting import VoteSchema
 from app.autentication import get_token, validate_token
 from app.asimetricEncript import generate_pair_keys
 from app.voting import sign_vote_by_priv_key
-from kafka.producer import send_to_kafka
+from kafka.producer_1 import send_to_kafka
 import asyncio
 
 
