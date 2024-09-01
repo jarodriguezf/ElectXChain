@@ -17,7 +17,7 @@ services:
       - ./api/run.py:/back-api/run.py
       - ./api/app:/back-api/app
       - ./system_public_key.pem:/back-api/system_public_key.pem
-      - ./kafka/producer.py:/back-api/kafka/producer.py
+      - ./kafka/producer_1.py:/back-api/kafka/producer_1.py
       - ./kafka/config.py:/back-api/kafka/config.py
     depends_on:
       db:
@@ -62,11 +62,12 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_OFFSETS_RETENTION_MINUTES: 1440
+      KAFKA_MESSAGE_MAX_BYTES: 2097152
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 2097152
       # logs
-      KAFKA_LOG_RETENTION_HOURS: 0
-      KAFKA_LOG_RETENTION_BYTES: 1024
-      KAFKA_LOG_SEGMENT_BYTES: 1024
-      KAFKA_LOG_RETENTION_MS: 1
+      KAFKA_LOG_RETENTION_MS: 86400000
+      KAFKA_LOG_RETENTION_BYTES: 1073741824
+      KAFKA_LOG_SEGMENT_BYTES: 2097152
     volumes:
       - /dev/null:/kafka/logs
     depends_on:
@@ -197,6 +198,7 @@ services:
       - hardhat
     volumes:
       - ./blockchain:/app
+      - ./kafka/producer_2.js:/app/scripts/producer_2.js
     command: sh -c "sleep 60 && npx hardhat run scripts/extract_and_store.js --network hardhatnode_host"
     networks:
       ElectXChain_network:
