@@ -6,7 +6,10 @@ async function configProducer() {
     try {
         const kafka = new Kafka({
             clientId: 'producer_2',
-            brokers: ['kafka_host:9093']
+            brokers: ['kafka_host:9093'],
+            producer: {
+                maxMessageSize: 1048576
+            }
         });
 
         const producer = kafka.producer();
@@ -52,6 +55,7 @@ function createMessage(key, value) {
 // INIT THE PRODUCER
 async function sendToKafka(key, value) {
     try {
+       // console.debug(`Size of value before sending kafka topic_2: ${value.length} bytes`);
         const producer = await configProducer();
         const message = createMessage(key, value);
 
