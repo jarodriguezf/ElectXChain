@@ -17,3 +17,4 @@ hardhat.config.js
 package-lock.json
 package.json
 deployments.json
+spark/decrypt_validate
