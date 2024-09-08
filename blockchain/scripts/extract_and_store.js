@@ -3,16 +3,18 @@ const { ethers } = require('hardhat');
 const redis = require('redis');
 const path = require('path');
 const { sendToKafka } = require('./producer_2');
+const { Buffer } = require('node:buffer');
 
 const redisHost = process.env.REDIS_HOST || 'localhost';
 const redisPort = parseInt(process.env.REDIS_PORT, 10) || 6379;
 
 // REDIS CLIENT
-let redisClient = redis.createClient({
+const redisClient = redis.createClient({
   socket: {
     host: redisHost,
-    port: redisPort,
-  }
+    port: redisPort
+  },
+  database: 0
 });
 
 // ENSURE REDIS CONNECTION
@@ -28,14 +30,18 @@ const ensureRedisConnection = async () => {
 };
 
 // PROCESSING OF DATA AND SAVING IN THE BLOCKCHAIN
-const processBinaryData = async (key, buffer, contract) => {
-  console.log('Processing binary data for key:', key);
+const processBinaryData = async (key, value, contract) => {
+  console.log('Processing data for key:', key);
   
   try {
 
-    const dataBytes = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
+    let send_buffer = value
+    if (Buffer.isBuffer(send_buffer) === false){
+      send_buffer = Buffer.from(send_buffer, 'binary')
+    }
+    //console.debug(`Length of buffer before set in blockchain: ${send_buffer.length}`)
 
-    const tx = await contract.storeData(key, dataBytes); //CALL storeData TO SAVED THE DATA (CONTRACT)
+    const tx = await contract.storeData(key, send_buffer); //CALL storeData TO SAVED THE DATA (CONTRACT)
     const receipt = await tx.wait();
 
     if (receipt.status !== 1) {
@@ -45,13 +51,25 @@ const processBinaryData = async (key, buffer, contract) => {
 
     // CALL getData TO RETRIEVE THE STORED DATA (CONTRACT)
     const storedData = await contract.getData(key);
-    console.debug(`Data retrieved from blockchain for key ${key}`);
-    
-    // SEND THE KEY AND VALUE TO KAFKA PRODUCER
-    const valueBytes = Buffer.isBuffer(storedData) ? buffer : Buffer.from(storedData);
-    console.debug(`Value size: ${valueBytes.length}`);
-    await sendToKafka(key, valueBytes);
-    console.log('Message successfully send to kafka producer: vote_result.');
+    // console.debug(`Raw data from contract: ${storedData.length}`);// HEXADECIMAL
+    // console.debug(`Raw data from contract: ${storedData}`);// HEXADECIMAL
+
+    if (storedData && typeof storedData === 'string' && storedData.startsWith('0x')) {
+      // CONVERSION ARRAY BYTES
+      const valueBytesArray = ethers.utils.arrayify(storedData);
+      //console.debug(`Array of bytes length after conversion: ${valueBytesArray.length}`);
+
+      // CONVERSION BYTES
+      const valueBytes = Buffer.from(valueBytesArray, 'binary');
+      //console.debug(`Bytes length after conversion: ${valueBytes.length}`);
+
+      // SEND THE KEY AND VALUE TO KAFKA PRODUCER
+      await sendToKafka(key, valueBytes);
+      console.log('Message successfully send to kafka producer: vote_result.');
+    } else {
+      console.error('Data retrieved from contract is not in the expected format');
+      return;
+    }
 
   } catch (error) {
     console.error(`Error storing or retrieving data in blockchain or kafka for key ${key}:`, error.message);
@@ -104,13 +122,18 @@ const extractAndStore = async () => {
     // PROCESSED THE NEW KEYS
     for (const key of keys) {
       try {
-        const buffer = await redisClient.get(key, { buffer: true });
-        
-        if (buffer) {
-          await processBinaryData(key, buffer, contract);
-          await deleteKeyFromRedis(key); // DELETE THE KEY FROM REDIS AFTER PROCESSING
-        } else {
-          console.error(`No binary data found for key: ${key}`);
+        const result  = await redisClient.sendCommand(['GET', key], {
+          returnBuffers: true
+        });
+      
+        if (result) {
+          // const valueHex = result.toString('hex');
+          // console.debug(`Length of value retrieved from Redis: ${valueHex.length}`);
+          // console.debug(`Value representation from Redis:`, valueHex);
+          await processBinaryData(key, result, contract);
+          await deleteKeyFromRedis(key)
+        }else {
+          console.error(`Unexpected type for key ${key}: ${typeof result}`);
         }
       } catch (err) {
         console.error('Error processing key:', key, err);
