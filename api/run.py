@@ -243,7 +243,7 @@ async def is_activate(input: VoteSchema):
                raise HTTPException(status_code=500, detail='Not private key found')
 
           signature_user_vote = sign_vote_by_priv_key(concat_priv_key, input.vote)
-          #logger.debug(f'SIGNATURE ENCRYPT: {signature_user_vote}')
+          #logger.debug(f'len signature api: {len(signature_user_vote)}')
           # SEND THE DATA AND VOTE TO KAFKA
           asyncio.create_task(send_to_kafka(signature_user_vote, input.id))
           return {'message':'vote send successfully'}
