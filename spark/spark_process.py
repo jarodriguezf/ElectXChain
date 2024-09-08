@@ -1,9 +1,8 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.utils import AnalysisException
 from send_redis_data import store_in_redis
-from pyspark.sql.functions import col, length
+from pyspark.sql.functions import col
 import logging
-import time
 
 
 logging.basicConfig(level=logging.ERROR,
@@ -68,7 +67,6 @@ def df_verification_and_validation(df):
                        (col('key').isNotNull()) & 
                        (col('key').cast('string').isNotNull()) &
                        (col('value').isNotNull()))
-
     return df
 
 
