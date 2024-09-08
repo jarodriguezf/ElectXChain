@@ -61,13 +61,13 @@ services:
       KAFKA_LISTENER_NAME: INSIDE
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_OFFSETS_RETENTION_MINUTES: 1440
-      KAFKA_MESSAGE_MAX_BYTES: 2097152
-      KAFKA_REPLICA_FETCH_MAX_BYTES: 2097152
+      KAFKA_OFFSETS_RETENTION_MINUTES: 300
+      KAFKA_MESSAGE_MAX_BYTES: 1048576
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 1048576
       # logs
-      KAFKA_LOG_RETENTION_MS: 86400000
-      KAFKA_LOG_RETENTION_BYTES: 1073741824
-      KAFKA_LOG_SEGMENT_BYTES: 2097152
+      KAFKA_LOG_RETENTION_MS: 900000
+      KAFKA_LOG_RETENTION_BYTES: 1048576
+      KAFKA_LOG_SEGMENT_BYTES: 1048576
     volumes:
       - /dev/null:/kafka/logs
     depends_on:
@@ -116,9 +116,9 @@ services:
       context: ./spark
       dockerfile: Dockerfile
     environment:
-      - SPARK_MASTER=spark:/spark:7077
-      - REDIS_HOST=redis_host
-      - REDIS_PORT=6379
+      SPARK_MASTER: spark:/spark:7077
+      REDIS_HOST: redis_host
+      REDIS_PORT: 6379
     depends_on:
       - spark
       - redis
@@ -204,6 +204,28 @@ services:
       ElectXChain_network:
         aliases:
           - "hardhat-monitor_host"
+  
+  spark_counter:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile-counter
+    environment:
+      DECRYPT_KEY: ${DECRYPT_KEY}
+      SPARK_MASTER: spark:/spark:7077
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    depends_on:
+      - db
+      - spark
+    volumes:
+      - ./spark/spark_counter.py:/app/spark_counter.py
+      - ./system_private_key.pem:/app/system_private_key.pem
+      - ./spark/decrypt_validate:/app/decrypt_validate
+      - ./spark/db_connection:/app/db_connection
+    networks:
+      ElectXChain_network:
+        aliases:
+          - "spark_countervote_host"
 
 networks: 
   ElectXChain_network:
