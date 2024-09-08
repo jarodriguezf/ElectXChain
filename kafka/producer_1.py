@@ -1,5 +1,6 @@
 from confluent_kafka import Producer
 import logging
+import binascii
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -9,7 +10,8 @@ logger = logging.getLogger(__name__)
 def config_producer():
     try:
         config = {
-            'bootstrap.servers': 'kafka_host:9093'
+            'bootstrap.servers': 'kafka_host:9093',
+            'message.max.bytes': 1048576
         }
 
         # CREATE INSTANCE OF PRODUCER
@@ -48,12 +50,14 @@ def create_message(signature_user_vote, uuid):
 # INIT THE PRODUCER
 async def send_to_kafka(signature_user_vote, uuid):
     try:
+        #signature_hex = binascii.hexlify(signature_user_vote).decode('ascii')
+        #print(f'signature_user_vote value: {signature_hex}')
+        
         producer = config_producer()
         topic, key, message_value = create_message(signature_user_vote, uuid)
 
         # SEND THE MESSAGE
         producer.produce(topic, key=key, value=message_value, callback=delivery_report)
-
         # WAIT UNTIL ALL THE MESSAGES ARRIVES
         producer.flush() 
     except Exception as e:
