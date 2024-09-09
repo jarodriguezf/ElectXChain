@@ -222,6 +222,7 @@ services:
       - ./system_private_key.pem:/app/system_private_key.pem
       - ./spark/decrypt_validate:/app/decrypt_validate
       - ./spark/db_connection:/app/db_connection
+      - ./spark/json/hash_to_text.json:/app/json/hash_to_text.json
     networks:
       ElectXChain_network:
         aliases:

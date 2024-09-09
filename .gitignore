@@ -17,4 +17,6 @@ hardhat.config.js
 package-lock.json
 package.json
 deployments.json
-spark/decrypt_validate
+load_priv_key_system.py
+decrypt_validate
+spark/json

@@ -1,4 +1,3 @@
-import sys
 import os
 parentddir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 from db_connection.db import ShowsDataDbUsers
@@ -7,7 +6,8 @@ from decrypt_validate.process_signature import validate_encryption
 from pyspark.sql import SparkSession
 from pyspark.sql.utils import AnalysisException
 from pyspark.sql.functions import col, udf
-from pyspark.sql.types import BooleanType, StringType, StructType, StructField
+from pyspark.sql.types import BooleanType, StringType, StructField, StructType, IntegerType
+import json
 import logging
 
 logging.basicConfig(level=logging.ERROR,
@@ -30,7 +30,8 @@ def spark_session():
     except Exception as e:
         logger.error(f'Error: Spark context can\'t be built - {str(e)}')
         raise e
-
+    
+spark = spark_session()
 
 # READ FROM KAFKA IN STREAM
 def read_from_stream_kafka(spark):
@@ -76,10 +77,54 @@ def df_verification_and_validation(df):
     return df
 
 
+# LOAD THE JSON WITH THE HASH AND TEXT VOTE
+def load_vote_mapping(json_path):
+    try:
+        with open(json_path, 'r') as f:
+            vote_mapping = json.load(f)
+        return vote_mapping
+    except Exception as e:
+        logger.error(f'Error loading vote mapping JSON - {str(e)}')
+        raise e
+vote_mapping = load_vote_mapping('json/hash_to_text.json')
+
+
+# GLOBAL DATAFRAME FOR ACCUMULATED VOTES
+schema = StructType([
+    StructField("vote_option", StringType(), True),
+    StructField("count", IntegerType(), True)
+])
+accumulated_votes_df = spark.createDataFrame([], schema)
+
+
+# COUNTING THE VOTES WITH HIS TEXT REPRESENTATION
+def counting_votes(df, vote):
+    global accumulated_votes_df
+    try:
+        vote_option_df  = df.withColumn("vote_option", udf(lambda _: vote_mapping.get(vote, "Vote not valid"), StringType())(col("is_valid")))
+        current_counts = vote_option_df.groupBy("vote_option").count()
+
+        # UNION WITH THE ACCUMULATED COUNT
+        updated_counts = accumulated_votes_df.alias("accumulated").join(
+            current_counts.alias("current"),
+            on="vote_option",
+            how="outer"
+        ).selectExpr(
+            "coalesce(accumulated.vote_option, current.vote_option) as vote_option",
+            "coalesce(accumulated.count, 0) + coalesce(current.count, 0) as count"
+        )
+        accumulated_votes_df = updated_counts
+        updated_counts.show()
+    except Exception as e:
+        logger.error(f'Error: In the counting of votes - {str(e)}')
+        raise e
+
+
 # DECRYPT AND VALIDATE THE SIGNATURE
 def validate_signature(df, epoch_id):
     getUserData = ShowsDataDbUsers()
-    
+    last_vote_user = None
+
     # PROCESS THE KEY
     distinct_ids = df.select("key").distinct().collect()
     
@@ -107,12 +152,22 @@ def validate_signature(df, epoch_id):
             )
         validate_udf = udf(validate_row, BooleanType())
         df = df.withColumn("is_valid", validate_udf(col("value")))
-    df.show(truncate=False)
+
+        last_vote_user = vote_user
+    # DROP THE PROCESS ALREADY FINISHED
+    if last_vote_user is not None and df.count() > 0:
+        temp_valid_df = df.withColumn("unique_id", col("key") + col("value").cast("string"))
+        temp_valid_df = temp_valid_df.dropDuplicates(["unique_id"])
+        counting_votes(temp_valid_df, last_vote_user)
+    else:
+        logger.info('No valid vote_user found to process.')
 
 
 # PRINT THE VALUES IN CONSOLE
 def write_values_from_kafka():
-    spark = spark_session()
+    global accumulated_votes_df
+    accumulated_votes_df = spark.createDataFrame([], schema)
+
     kafka_stream = read_from_stream_kafka(spark)
     df = casting_data(kafka_stream)
     df = df_verification_and_validation(df)
