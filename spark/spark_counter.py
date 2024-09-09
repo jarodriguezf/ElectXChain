@@ -1,6 +1,6 @@
 import os
 parentddir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
-from db_connection.db import ShowsDataDbUsers
+from db_connection.db import ShowsDataDbUsers, CreateTableCounter, SaveNewVotesCount
 from decrypt_validate.load_priv_key_system import load_private_system_key
 from decrypt_validate.process_signature import validate_encryption
 from pyspark.sql import SparkSession
@@ -18,6 +18,10 @@ logger.setLevel(logging.ERROR)
 spark_logger = logging.getLogger('org.apache.spark')
 spark_logger.setLevel(logging.ERROR)
 
+
+# CREATE TABLE COUNTER (THAT FUNCTION DROP THE TABLE AND CREATE IT AGAIN)
+#createTable = CreateTableCounter()
+#createTable.create_table()
 
 # SPARK SESSION
 def spark_session():
@@ -89,32 +93,15 @@ def load_vote_mapping(json_path):
 vote_mapping = load_vote_mapping('json/hash_to_text.json')
 
 
-# GLOBAL DATAFRAME FOR ACCUMULATED VOTES
-schema = StructType([
-    StructField("vote_option", StringType(), True),
-    StructField("count", IntegerType(), True)
-])
-accumulated_votes_df = spark.createDataFrame([], schema)
-
-
 # COUNTING THE VOTES WITH HIS TEXT REPRESENTATION
+saveVotesDb = SaveNewVotesCount()
 def counting_votes(df, vote):
-    global accumulated_votes_df
     try:
         vote_option_df  = df.withColumn("vote_option", udf(lambda _: vote_mapping.get(vote, "Vote not valid"), StringType())(col("is_valid")))
         current_counts = vote_option_df.groupBy("vote_option").count()
 
-        # UNION WITH THE ACCUMULATED COUNT
-        updated_counts = accumulated_votes_df.alias("accumulated").join(
-            current_counts.alias("current"),
-            on="vote_option",
-            how="outer"
-        ).selectExpr(
-            "coalesce(accumulated.vote_option, current.vote_option) as vote_option",
-            "coalesce(accumulated.count, 0) + coalesce(current.count, 0) as count"
-        )
-        accumulated_votes_df = updated_counts
-        updated_counts.show()
+        # APPLY THE FUNCTION sendVoteToDB TO EVERY ROW IN THE DF
+        current_counts.foreach(lambda row: saveVotesDb.sendVoteToDB(row["vote_option"], row["count"]))
     except Exception as e:
         logger.error(f'Error: In the counting of votes - {str(e)}')
         raise e
@@ -152,7 +139,7 @@ def validate_signature(df, epoch_id):
             )
         validate_udf = udf(validate_row, BooleanType())
         df = df.withColumn("is_valid", validate_udf(col("value")))
-
+        df = df.filter(col('is_valid')==True)
         last_vote_user = vote_user
     # DROP THE PROCESS ALREADY FINISHED
     if last_vote_user is not None and df.count() > 0:
@@ -165,9 +152,6 @@ def validate_signature(df, epoch_id):
 
 # PRINT THE VALUES IN CONSOLE
 def write_values_from_kafka():
-    global accumulated_votes_df
-    accumulated_votes_df = spark.createDataFrame([], schema)
-
     kafka_stream = read_from_stream_kafka(spark)
     df = casting_data(kafka_stream)
     df = df_verification_and_validation(df)
