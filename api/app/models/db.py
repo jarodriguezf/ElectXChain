@@ -1,6 +1,5 @@
 import MySQLdb
 import os
-import sys
 import logging
 import hashlib
 

@@ -141,11 +141,11 @@ def validate_signature(df, epoch_id):
         df = df.withColumn("is_valid", validate_udf(col("value")))
         df = df.filter(col('is_valid')==True)
         last_vote_user = vote_user
-    # DROP THE PROCESS ALREADY FINISHED
+    # DROP THE DUPLICATED PROCESS
     if last_vote_user is not None and df.count() > 0:
         temp_valid_df = df.withColumn("unique_id", col("key") + col("value").cast("string"))
-        temp_valid_df = temp_valid_df.dropDuplicates(["unique_id"])
-        counting_votes(temp_valid_df, last_vote_user)
+        valid_df = temp_valid_df.dropDuplicates(["unique_id"])
+        counting_votes(valid_df, last_vote_user)
     else:
         logger.info('No valid vote_user found to process.')
 
