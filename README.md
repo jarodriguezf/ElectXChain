@@ -98,7 +98,7 @@ Finaliza la interacción del usuario viendo la pagina de información final.
 ![cipher_flow drawio](https://github.com/user-attachments/assets/5607a71b-6e84-49ab-9ed0-8e117a4021b6)
 
 
-7. Manejo interno de los datos.
+6. Manejo interno de los datos.
   - Base de datos relacional: Los datos del usuario se guardan en mariadb, permitiendo persistir la información. Estos datos se guardan de manera que no podemos saber que votó cada usuario, manteniendo la seguridad e integridad de voto.
 
 *La información mas sensible como la clave privada y el voto, se almacenan por un lado (clave privada) encriptada y por otro lado (voto) hasheado*
