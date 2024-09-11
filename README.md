@@ -79,7 +79,26 @@ Finaliza la interacción del usuario viendo la pagina de información final.
 
 ![final_user_page](https://github.com/user-attachments/assets/b782f0dc-c732-4850-9355-6cc3cd61c9a3)
 
-5. Manejo interno de los datos.
+5. Proceso de encriptación del voto y desencriptacion.
+   - ENCRIPTACIÓN -
+   - Cuando el usuario selecciona la eleccion deseada, el voto se envía a un script ('voting', no se muestra en el repositorio remoto por seguridad) donde se realizan varios procesos:
+     1. Hasheo del voto en bytes.
+     2. Firma del voto con la llave privada del usuario (la llave privada del usuario viene de la db cifrada simetricamente, por tanto es necesario desencriptarla para obtener su valor original).
+     3. Cifrado simetrica de la firma con el voto dado previamente (algoritmo AES), generando una clave para encriptar y desencriptar.
+     4. Cifrado de la clave AES con la llave publica del sistema (asegurando que solo el sistema acceda a la clave AES y por tanto firma del usuario), cifrado con RSA.
+     5. Envió de la firma cifrada tanto con RSA como AES.
+   - DESENCRIPTACIÓN -
+   - Cuando la firma digital llega al ultimo script de spark ('spark_counter'), validamos el tipo y contenido de la firma, si es correcto inicia el proceso de desencriptación ('process_signature', no esta subido al remoto por seguridad).
+     1. Separar la clave cifrada  de la firma cifrada.
+     2. Obtener la clave mediante la llave privada del sistema (obteniendo la clave AES).
+     3. Con la clave desencriptamos la firma del usuario.
+     4. Comparamos el contenido interno con el voto almacenado en bd (toda comparación has hash de bytes).
+     5. Si es correcto, se contabiliza el voto, si no es correcto se rechaza.
+
+![cipher_flow drawio](https://github.com/user-attachments/assets/5607a71b-6e84-49ab-9ed0-8e117a4021b6)
+
+
+7. Manejo interno de los datos.
   - Base de datos relacional: Los datos del usuario se guardan en mariadb, permitiendo persistir la información. Estos datos se guardan de manera que no podemos saber que votó cada usuario, manteniendo la seguridad e integridad de voto.
 
 *La información mas sensible como la clave privada y el voto, se almacenan por un lado (clave privada) encriptada y por otro lado (voto) hasheado*
@@ -88,8 +107,8 @@ Finaliza la interacción del usuario viendo la pagina de información final.
 
   - Kafka-1: Los datos de la votación ejercido por el usuario en el punto 4, viaja a un topico de kafka (directorio: kafka, script: producer_1, topic: vote_passthrough) almacenando en el broker tanto el uuid como la firma digital encriptada.
   - Spark-1: Un script (directorio: spark, script: spark_process) consume los datos del topico, validando que los datos lleguen integros y almacenando en cache estos mismos (almacenamiento en Redis).
-  - Redis: Persiste los datos en caché hasta que la blockchain notifique a Redis la llegada correcta de estos datos.
-  - Blockchain: Almacena en el nodo los datos (directorio: blockchain, archivos: contracts y scripts), permitiendo revisar las transaccciones realizadas de cada usuario (aumenta la seguridad y la integridad de voto).
+  - Redis: Persiste los datos en caché hasta que la blockchain notifique a Redis la llegada correcta de estos datos, entonces borra el registro.
+  - Blockchain: Almacena en el nodo los datos (directorio: blockchain, archivos: contracts y scripts), permitiendo revisar las transaccciones realizadas de cada usuario (aumenta la seguridad, la integridad de voto y la inmutabilidad de los datos).
   - Kafka-2: Una vez almacenado se envía a otro topico de kafka (directorio: kafka, script: producer_2, topic: vote_result) encargado de mover la información hacia el script para desencriptar y contabilizar los votos.
   - Spark-2: Consumimos los datos del segundo topico de kafka (directorio: spark, script: spark_counter), validamos la información y desencriptamos la firma, permitiendo validar si el contenido interno es igual al hash de la firma en db para cada usuario. Si la firma es correcta el voto se persiste en una nueva tabla en la base de datos (contabilizando cada voto por separado).
   
