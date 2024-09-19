@@ -48,7 +48,8 @@ Los datos usados en este proyecto han sido todos ficticios, tanto dnis, nombres,
      
    *En todo este proceso se producen controles de excepciones, garantizando la integridad de los datos almacenados*
 
-![register](https://github.com/user-attachments/assets/b85429de-7126-4fc9-b544-7326cc1bc429)
+![register](https://github.com/user-attachments/assets/ef1a4bb8-9413-4195-9787-a6bee968ab5c)
+
 
 2. Autenticacion:
    - El usuario ingresa su dni y el numero de telefono con el que se registró conteriormente.
@@ -56,7 +57,8 @@ Los datos usados en este proyecto han sido todos ficticios, tanto dnis, nombres,
      
    *En todo el proceso se garantiza que el usuario sea verídico, activando un campo para controlar los usuarios autenticados y los solo registrados*
 
-![autenticate](https://github.com/user-attachments/assets/1b5833b5-c661-4c60-9093-60da6b2993bf)
+![autenticate](https://github.com/user-attachments/assets/fe919126-4b69-4fe9-823b-8284c0d2cbf3)
+
 
 3. Autentication two factor:
    - El usuario ingresa el codigo enviado a través de sms en su movil (en este caso se envía mediente un endpoint para simular el envío de sms).
@@ -73,7 +75,8 @@ Los datos usados en este proyecto han sido todos ficticios, tanto dnis, nombres,
      
    *Controlamos que el usuario no haya votado mas de una vez y que los datos se pasen al sistema encriptados*
 
-![vote_page](https://github.com/user-attachments/assets/11772794-b523-435a-b05c-b2b9d37ffde4)
+![vote](https://github.com/user-attachments/assets/54891882-6a0d-42d7-ad0e-8b673c665434)
+
 
 Finaliza la interacción del usuario viendo la pagina de información final.
 
@@ -103,7 +106,8 @@ Finaliza la interacción del usuario viendo la pagina de información final.
 
 *La información mas sensible como la clave privada y el voto, se almacenan por un lado (clave privada) encriptada y por otro lado (voto) hasheado*
 
-![db](https://github.com/user-attachments/assets/9ac97604-7594-494e-ae88-e0e044612871)
+![bd](https://github.com/user-attachments/assets/e39aba83-1e34-423a-bd6f-c0573efbd108)
+
 
   - Kafka-1: Los datos de la votación ejercido por el usuario en el punto 4, viaja a un topico de kafka (directorio: kafka, script: producer_1, topic: vote_passthrough) almacenando en el broker tanto el uuid como la firma digital encriptada.
   - Spark-1: Un script (directorio: spark, script: spark_process) consume los datos del topico, validando que los datos lleguen integros y almacenando en cache estos mismos (almacenamiento en Redis).
