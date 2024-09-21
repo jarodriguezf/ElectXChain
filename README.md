@@ -123,7 +123,8 @@ Finaliza la interacción del usuario viendo la pagina de información final.
   - PowerBI: Conectamos a la base de datos, tanto la de los usuarios como la de votos. Extrayendo la información y realizando un dashboard para monitorizar el conteo automatico del sistema.
 
 *Cada conteo de votos así como provincias cuyos usuarios han votado y el genero se registra para posterior analisis*
-![dashboard](https://github.com/user-attachments/assets/0df1da58-0d69-472d-b0d2-601499aacdd7)
+![dashboard](https://github.com/user-attachments/assets/d3ea41f2-9b32-494f-aaa3-e5c1e7df69dc)
+
 
 ## Conclusión 🎉
 
