@@ -37,6 +37,8 @@ Los datos usados en este proyecto han sido todos ficticios, tanto dnis, nombres,
 - Lenguajes web (html, css, javascript)
 - Gestores de DB (mariaDB, Redis)
 - Hardhat (blockchain)
+- Docker
+- Git
 - PowerBI
 
 ## Funcionamiento de la aplicación 🚀
